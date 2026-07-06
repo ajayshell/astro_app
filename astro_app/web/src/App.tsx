@@ -1,44 +1,31 @@
-import { useEffect, useMemo, useState } from "react";
-import { DndContext } from "@dnd-kit/core";
-import type { DragEndEvent } from "@dnd-kit/core";
+import { useMemo, useState } from "react";
 import { BirthForm } from "./components/BirthForm";
-import { SouthIndianChart } from "./components/SouthIndianChart";
-import { NorthIndianChart } from "./components/NorthIndianChart";
+import { ChartPanel } from "./components/ChartPanel";
 import { DashaTable } from "./components/DashaTable";
+import { CharaKarakaTable } from "./components/CharaKarakaTable";
 import type { BirthInput, ChartResult } from "./astro/types";
-import { computeChart } from "./astro/charts";
+import { computeChart, computeTransitChart } from "./astro/charts";
 import { computeVimshottariDasha } from "./astro/dasha";
 import type { DashaPeriod } from "./astro/dasha";
-import { computeVarga, IMPLEMENTED_VARGAS, PENDING_VARGAS } from "./astro/varga";
+import { IMPLEMENTED_VARGAS, PENDING_VARGAS } from "./astro/varga";
 import type { VargaKind } from "./astro/varga";
-import type { PlanetName } from "./astro/constants";
 import { formatDegree, RASI_ABBR } from "./astro/format";
 import "./App.css";
 
-type PlanetSlot = { planet: PlanetName; isRetrograde: boolean };
 type ChartStyle = "south" | "north";
+type ViewMode = "overview" | "explore";
 
 function App() {
+  const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
   const [chart, setChart] = useState<ChartResult | null>(null);
   const [chartStyle, setChartStyle] = useState<ChartStyle>("south");
   const [vargaKind, setVargaKind] = useState<VargaKind>("D1");
-  const [placement, setPlacement] = useState<Record<number, PlanetSlot[]>>({});
+  const [view, setView] = useState<ViewMode>("overview");
 
-  useEffect(() => {
-    if (!chart) return;
-    const next: Record<number, PlanetSlot[]> = {};
-    for (const p of chart.planets) {
-      const rasi = vargaKind === "D1" ? p.rasi : p.vargas[vargaKind];
-      next[rasi] = next[rasi] ?? [];
-      next[rasi].push({ planet: p.planet, isRetrograde: p.isRetrograde });
-    }
-    setPlacement(next);
-  }, [chart, vargaKind]);
-
-  const ascendantRasiForVarga = useMemo(() => {
-    if (!chart) return 0;
-    return vargaKind === "D1" ? chart.ascendantRasi : computeVarga(vargaKind, chart.ascendantSiderealLongitude);
-  }, [chart, vargaKind]);
+  const transitChart = useMemo(() => {
+    if (!birthInput) return null;
+    return computeTransitChart(birthInput);
+  }, [birthInput]);
 
   const dasha: DashaPeriod[] = useMemo(() => {
     if (!chart) return [];
@@ -49,41 +36,15 @@ function App() {
 
   function handleBirthSubmit(input: BirthInput) {
     setVargaKind("D1");
+    setBirthInput(input);
     setChart(computeChart(input));
   }
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (!over) return;
-    const planet = active.id as PlanetName;
-    const targetRasi = Number(String(over.id).replace("rasi-", ""));
-
-    setPlacement((prev) => {
-      let movedEntry: PlanetSlot | undefined;
-      const cleared: Record<number, PlanetSlot[]> = {};
-      for (const [rasiKey, slots] of Object.entries(prev)) {
-        const rasi = Number(rasiKey);
-        cleared[rasi] = slots.filter((s) => {
-          if (s.planet === planet) {
-            movedEntry = s;
-            return false;
-          }
-          return true;
-        });
-      }
-      if (!movedEntry) return prev;
-      cleared[targetRasi] = [...(cleared[targetRasi] ?? []), movedEntry];
-      return cleared;
-    });
-  }
-
-  const ChartComponent = chartStyle === "south" ? SouthIndianChart : NorthIndianChart;
 
   return (
     <div className="app-shell">
       <header>
-        <h1>South Indian Horoscope</h1>
-        <p className="subtitle">Vedic birth-chart prototype &mdash; for astrologer review</p>
+        <h1>{birthInput?.name ?? "Aj"}&rsquo;s Horoscope</h1>
+        <p className="subtitle">South Indian Horoscope &mdash; for astrologer review</p>
       </header>
 
       <div className="app-body">
@@ -101,18 +62,28 @@ function App() {
               </label>
 
               <label>
-                Divisional chart
-                <select value={vargaKind} onChange={(e) => setVargaKind(e.target.value as VargaKind)}>
-                  {IMPLEMENTED_VARGAS.map((k) => (
-                    <option key={k} value={k}>
-                      {k}
-                      {k === "D1" && " (Rasi)"}
-                      {k === "D9" && " (Navamsa)"}
-                      {k === "D10" && " (Dashamsa)"}
-                    </option>
-                  ))}
+                View
+                <select value={view} onChange={(e) => setView(e.target.value as ViewMode)}>
+                  <option value="overview">Overview (D1 + D9 + Transit)</option>
+                  <option value="explore">Explore a single divisional chart</option>
                 </select>
               </label>
+
+              {view === "explore" && (
+                <label>
+                  Divisional chart
+                  <select value={vargaKind} onChange={(e) => setVargaKind(e.target.value as VargaKind)}>
+                    {IMPLEMENTED_VARGAS.map((k) => (
+                      <option key={k} value={k}>
+                        {k}
+                        {k === "D1" && " (Rasi)"}
+                        {k === "D9" && " (Navamsa)"}
+                        {k === "D10" && " (Dashamsa)"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <p className="pending-note">
                 Pending astrologer sign-off: {PENDING_VARGAS.join(", ")}
               </p>
@@ -149,10 +120,20 @@ function App() {
         <main className="chart-area">
           {chart ? (
             <>
-              <DndContext onDragEnd={handleDragEnd}>
-                <ChartComponent ascendantRasi={ascendantRasiForVarga} placement={placement} />
-              </DndContext>
+              {view === "overview" ? (
+                <div className="chart-panel-grid">
+                  <ChartPanel title="Rasi (D1)" chart={chart} vargaKind="D1" chartStyle={chartStyle} />
+                  <ChartPanel title="Navamsa (D9)" chart={chart} vargaKind="D9" chartStyle={chartStyle} />
+                  {transitChart && (
+                    <ChartPanel title="Transit (Gochara)" chart={transitChart} vargaKind="D1" chartStyle={chartStyle} />
+                  )}
+                </div>
+              ) : (
+                <ChartPanel title={vargaKind} chart={chart} vargaKind={vargaKind} chartStyle={chartStyle} />
+              )}
               <p className="hint">Drag a planet chip into another house to test alternate placements.</p>
+
+              <CharaKarakaTable chart={chart} />
 
               <section className="dasha-section">
                 <h3>Vimshottari Dasha (Moon-nakshatra based)</h3>

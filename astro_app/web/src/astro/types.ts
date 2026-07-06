@@ -1,6 +1,7 @@
 import type { PlanetName } from "./constants";
 
 export interface BirthInput {
+  name: string;
   date: string; // "YYYY-MM-DD"
   time: string; // "HH:mm", 24h, local time at the birth place
   latitude: number;
@@ -8,6 +9,11 @@ export interface BirthInput {
   timezoneOffsetHours: number; // e.g. 5.5 for IST, resolved from the place + date
   timezoneName?: string;
   placeName?: string;
+}
+
+export interface PlanetSlot {
+  planet: PlanetName;
+  isRetrograde: boolean;
 }
 
 export interface PlanetPosition {
