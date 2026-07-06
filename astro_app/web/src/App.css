@@ -1,0 +1,199 @@
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.app-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 3rem;
+}
+
+header h1 {
+  margin-bottom: 0.1rem;
+}
+
+.subtitle {
+  margin-top: 0;
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.app-body {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.sidebar {
+  flex: 1 1 280px;
+  min-width: 260px;
+  max-width: 340px;
+}
+
+.chart-area {
+  flex: 2 1 480px;
+  min-width: 320px;
+}
+
+.birth-form, .controls, .summary {
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.birth-form label, .controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.custom-coords {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.form-error {
+  color: #d33;
+  font-size: 0.85rem;
+}
+
+.pending-note {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.planet-table, .dasha-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.planet-table th, .planet-table td,
+.dasha-table th, .dasha-table td {
+  padding: 0.25rem 0.4rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  text-align: left;
+}
+
+/* South Indian 4x4 grid */
+.south-indian-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  aspect-ratio: 1 / 1;
+  max-width: 480px;
+  border: 2px solid currentColor;
+}
+
+.rasi-cell {
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  padding: 0.35rem;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  overflow: hidden;
+}
+
+.rasi-cell-over {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.rasi-cell-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.rasi-asc-marker {
+  color: #d97706;
+}
+
+.rasi-cell-planets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin-top: 0.25rem;
+}
+
+.planet-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, #3b82f6 25%, transparent);
+  cursor: grab;
+  user-select: none;
+  font-size: 0.75rem;
+  touch-action: none;
+}
+
+/* North Indian diamond */
+.north-indian-wrap {
+  position: relative;
+  max-width: 480px;
+}
+
+.north-indian-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.north-indian-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.rasi-cell-diamond {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: none;
+  min-width: 3.5rem;
+  max-width: 5.5rem;
+  text-align: center;
+  align-items: center;
+  background: transparent;
+}
+
+.hint {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+.dasha-section {
+  margin-top: 1.5rem;
+}
+
+.dasha-toggle {
+  border: none;
+  background: none;
+  cursor: pointer;
+  margin-right: 0.35rem;
+  font-family: monospace;
+}
+
+.dasha-row.depth-1 td:first-child {
+  padding-left: 1.5rem;
+  opacity: 0.85;
+}
+
+.placeholder {
+  opacity: 0.6;
+}
