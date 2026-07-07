@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { DashaPeriod } from "../astro/dasha";
+import { useI18n } from "../i18n/LanguageContext";
 
 function fmt(d: Date): string {
   return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
@@ -7,6 +8,7 @@ function fmt(d: Date): string {
 
 function Row({ period, depth }: { period: DashaPeriod; depth: number }) {
   const [open, setOpen] = useState(false);
+  const { planetName } = useI18n();
   const hasChildren = period.antardashas.length > 0;
 
   return (
@@ -18,7 +20,7 @@ function Row({ period, depth }: { period: DashaPeriod; depth: number }) {
               {open ? "−" : "+"}
             </button>
           )}
-          {period.lord}
+          {planetName(period.lord)}
         </td>
         <td>{fmt(period.start)}</td>
         <td>{fmt(period.end)}</td>
@@ -29,13 +31,14 @@ function Row({ period, depth }: { period: DashaPeriod; depth: number }) {
 }
 
 export function DashaTable({ periods }: { periods: DashaPeriod[] }) {
+  const { t } = useI18n();
   return (
     <table className="dasha-table">
       <thead>
         <tr>
-          <th>Lord (Mahadasha)</th>
-          <th>Start</th>
-          <th>End</th>
+          <th>{t("lordMahadasha")}</th>
+          <th>{t("start")}</th>
+          <th>{t("end")}</th>
         </tr>
       </thead>
       <tbody>

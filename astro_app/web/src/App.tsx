@@ -9,13 +9,16 @@ import { computeVimshottariDasha } from "./astro/dasha";
 import type { DashaPeriod } from "./astro/dasha";
 import { IMPLEMENTED_VARGAS, PENDING_VARGAS } from "./astro/varga";
 import type { VargaKind } from "./astro/varga";
-import { formatDegree, RASI_ABBR } from "./astro/format";
+import { formatDegree } from "./astro/format";
+import { useI18n } from "./i18n/LanguageContext";
+import type { Language } from "./i18n/translations";
 import "./App.css";
 
 type ChartStyle = "south" | "north";
 type ViewMode = "overview" | "explore";
 
 function App() {
+  const { language, setLanguage, t, rasiLabel, rasiFullName, planetName, nakshatraName } = useI18n();
   const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
   const [chart, setChart] = useState<ChartResult | null>(null);
   const [chartStyle, setChartStyle] = useState<ChartStyle>("south");
@@ -42,9 +45,19 @@ function App() {
 
   return (
     <div className="app-shell">
+      <div className="top-bar">
+        <label className="language-toggle">
+          {t("language")}
+          <select value={language} onChange={(e) => setLanguage(e.target.value as Language)}>
+            <option value="en">English</option>
+            <option value="ta">தமிழ்</option>
+          </select>
+        </label>
+      </div>
+
       <header>
-        <h1>{birthInput?.name ?? "Aj"}&rsquo;s Horoscope</h1>
-        <p className="subtitle">South Indian Horoscope &mdash; for astrologer review</p>
+        <h1>{birthInput?.name ?? "Aj"}{t("horoscopeTitleSuffix")}</h1>
+        <p className="subtitle">{t("subtitle")}</p>
       </header>
 
       <div className="app-body">
@@ -54,24 +67,24 @@ function App() {
           {chart && (
             <div className="controls">
               <label>
-                Chart style
+                {t("chartStyle")}
                 <select value={chartStyle} onChange={(e) => setChartStyle(e.target.value as ChartStyle)}>
-                  <option value="south">South Indian</option>
-                  <option value="north">North Indian</option>
+                  <option value="south">{t("southIndian")}</option>
+                  <option value="north">{t("northIndian")}</option>
                 </select>
               </label>
 
               <label>
-                View
+                {t("view")}
                 <select value={view} onChange={(e) => setView(e.target.value as ViewMode)}>
-                  <option value="overview">Overview (D1 + D9 + Transit)</option>
-                  <option value="explore">Explore a single divisional chart</option>
+                  <option value="overview">{t("overviewOption")}</option>
+                  <option value="explore">{t("exploreOption")}</option>
                 </select>
               </label>
 
               {view === "explore" && (
                 <label>
-                  Divisional chart
+                  {t("divisionalChart")}
                   <select value={vargaKind} onChange={(e) => setVargaKind(e.target.value as VargaKind)}>
                     {IMPLEMENTED_VARGAS.map((k) => (
                       <option key={k} value={k}>
@@ -85,29 +98,35 @@ function App() {
                 </label>
               )}
               <p className="pending-note">
-                Pending astrologer sign-off: {PENDING_VARGAS.join(", ")}
+                {t("pendingSignOff")}: {PENDING_VARGAS.join(", ")}
               </p>
             </div>
           )}
 
           {chart && (
             <div className="summary">
-              <h3>Computed values</h3>
-              <p>Ayanamsa (Lahiri, approx.): {formatDegree(chart.ayanamsa)}</p>
+              <h3>{t("computedValues")}</h3>
+              <p>{t("ayanamsa")}: {formatDegree(chart.ayanamsa)}</p>
               <p>
-                Ascendant: {RASI_ABBR[chart.ascendantRasi]} {formatDegree(chart.ascendantSiderealLongitude)}
+                {t("ascendant")}: {rasiFullName(chart.ascendantRasi)} {formatDegree(chart.ascendantSiderealLongitude)}
               </p>
               <table className="planet-table">
                 <thead>
-                  <tr><th>Graha</th><th>Sign</th><th>Degree</th><th>Nakshatra</th><th>Pada</th></tr>
+                  <tr>
+                    <th>{t("graha")}</th>
+                    <th>{t("sign")}</th>
+                    <th>{t("degree")}</th>
+                    <th>{t("nakshatra")}</th>
+                    <th>{t("pada")}</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {chart.planets.map((p) => (
                     <tr key={p.planet}>
-                      <td>{p.planet}{p.isRetrograde && " (R)"}</td>
-                      <td>{RASI_ABBR[p.rasi]}</td>
+                      <td>{planetName(p.planet)}{p.isRetrograde && " (R)"}</td>
+                      <td>{rasiLabel(p.rasi)}</td>
                       <td>{formatDegree(p.siderealLongitude)}</td>
-                      <td>{p.nakshatra + 1}</td>
+                      <td>{nakshatraName(p.nakshatra)}</td>
                       <td>{p.nakshatraPada}</td>
                     </tr>
                   ))}
@@ -122,26 +141,26 @@ function App() {
             <>
               {view === "overview" ? (
                 <div className="chart-panel-grid">
-                  <ChartPanel title="Rasi (D1)" chart={chart} vargaKind="D1" chartStyle={chartStyle} />
-                  <ChartPanel title="Navamsa (D9)" chart={chart} vargaKind="D9" chartStyle={chartStyle} />
+                  <ChartPanel title={t("rasiD1")} chart={chart} vargaKind="D1" chartStyle={chartStyle} />
+                  <ChartPanel title={t("navamsaD9")} chart={chart} vargaKind="D9" chartStyle={chartStyle} />
                   {transitChart && (
-                    <ChartPanel title="Transit (Gochara)" chart={transitChart} vargaKind="D1" chartStyle={chartStyle} />
+                    <ChartPanel title={t("transit")} chart={transitChart} vargaKind="D1" chartStyle={chartStyle} />
                   )}
                 </div>
               ) : (
                 <ChartPanel title={vargaKind} chart={chart} vargaKind={vargaKind} chartStyle={chartStyle} />
               )}
-              <p className="hint">Drag a planet chip into another house to test alternate placements.</p>
+              <p className="hint">{t("dragHint")}</p>
 
               <CharaKarakaTable chart={chart} />
 
               <section className="dasha-section">
-                <h3>Vimshottari Dasha (Moon-nakshatra based)</h3>
+                <h3>{t("dashaTitle")}</h3>
                 <DashaTable periods={dasha} />
               </section>
             </>
           ) : (
-            <p className="placeholder">Enter birth details to generate a chart.</p>
+            <p className="placeholder">{t("enterBirthDetails")}</p>
           )}
         </main>
       </div>

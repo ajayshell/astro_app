@@ -1,5 +1,4 @@
 import type { PlanetName } from "../astro/constants";
-import { RASI_ABBR } from "../astro/format";
 import { RasiCell } from "./RasiCell";
 
 interface Props {
@@ -43,7 +42,6 @@ export function NorthIndianChart({ ascendantRasi, placement }: Props) {
             <RasiCell
               key={house}
               rasiIndex={rasi}
-              signLabel={RASI_ABBR[rasi]}
               houseNumber={house}
               isAscendant={house === 1}
               planets={placement[rasi] ?? []}

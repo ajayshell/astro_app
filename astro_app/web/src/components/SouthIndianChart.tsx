@@ -1,5 +1,4 @@
 import type { PlanetName } from "../astro/constants";
-import { RASI_ABBR } from "../astro/format";
 import { houseOfRasi } from "../astro/charts";
 import { RasiCell } from "./RasiCell";
 
@@ -10,7 +9,7 @@ interface Props {
 
 // Fixed South Indian layout: signs occupy fixed cells in a 4x4 grid, going
 // clockwise from Pisces (top-left) through Aries (top, 2nd cell). The middle
-// 2x2 block is unused.
+// 2x2 block is unused, aside from the traditional crossed diagonals.
 const GRID_POSITIONS: { rasi: number; row: number; col: number }[] = [
   { rasi: 11, row: 1, col: 1 }, // Pisces
   { rasi: 0, row: 1, col: 2 }, // Aries
@@ -29,11 +28,15 @@ const GRID_POSITIONS: { rasi: number; row: number; col: number }[] = [
 export function SouthIndianChart({ ascendantRasi, placement }: Props) {
   return (
     <div className="south-indian-grid">
+      {/* Traditional crossed diagonals through the unused center block. */}
+      <svg className="south-indian-cross" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="25" y1="25" x2="75" y2="75" />
+        <line x1="75" y1="25" x2="25" y2="75" />
+      </svg>
       {GRID_POSITIONS.map(({ rasi, row, col }) => (
         <RasiCell
           key={rasi}
           rasiIndex={rasi}
-          signLabel={RASI_ABBR[rasi]}
           houseNumber={houseOfRasi(rasi, ascendantRasi)}
           isAscendant={rasi === ascendantRasi}
           planets={placement[rasi] ?? []}

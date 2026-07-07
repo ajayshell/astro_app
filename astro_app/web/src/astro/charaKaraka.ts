@@ -15,6 +15,7 @@ const KARAKA_PLANETS: PlanetName[] = ["Sun", "Moon", "Mars", "Mercury", "Jupiter
 
 export interface CharaKarakaRow {
   karaka: string;
+  karakaIndex: number;
   planet: PlanetName;
   degreeInSign: number;
 }
@@ -38,6 +39,7 @@ export function computeCharaKarakas(chart: ChartResult): CharaKarakaRow[] {
 
   return candidates.map((c, i) => ({
     karaka: CHARA_KARAKA_NAMES[i] ?? "-",
+    karakaIndex: i,
     planet: c.planet,
     degreeInSign: c.degreeInSign,
   }));

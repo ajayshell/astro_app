@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CITIES } from "../data/cities";
 import { resolveTimezone } from "../astro/timezone";
 import type { BirthInput } from "../astro/types";
+import { useI18n } from "../i18n/LanguageContext";
 
 interface Props {
   onSubmit: (input: BirthInput) => void;
@@ -11,6 +12,7 @@ const CUSTOM_OPTION = "__custom__";
 const DEFAULT_CITY = "Bengaluru";
 
 export function BirthForm({ onSubmit }: Props) {
+  const { t } = useI18n();
   const [name, setName] = useState("Aj");
   const [date, setDate] = useState("1979-06-29");
   const [time, setTime] = useState("08:21");
@@ -27,11 +29,11 @@ export function BirthForm({ onSubmit }: Props) {
     const longitude = usingCustom ? parseFloat(customLon) : city!.longitude;
 
     if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
-      setError("Latitude/longitude must be valid numbers.");
+      setError(t("latLonInvalid"));
       return null;
     }
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-      setError("Latitude must be -90..90 and longitude -180..180.");
+      setError(t("latLonRange"));
       return null;
     }
 
@@ -55,8 +57,8 @@ export function BirthForm({ onSubmit }: Props) {
     try {
       const input = buildInput();
       if (input) onSubmit(input);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not resolve time zone for this location.");
+    } catch {
+      setError(t("tzError"));
     }
   }
 
@@ -74,39 +76,39 @@ export function BirthForm({ onSubmit }: Props) {
 
   return (
     <form className="birth-form" onSubmit={handleSubmit}>
-      <h2>Birth details</h2>
+      <h2>{t("birthDetails")}</h2>
 
       <label>
-        Name
+        {t("name")}
         <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Aj" />
       </label>
 
       <label>
-        Date of birth
+        {t("dateOfBirth")}
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
       </label>
 
       <label>
-        Time of birth
+        {t("timeOfBirth")}
         <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
       </label>
 
       <label>
-        Place of birth
+        {t("placeOfBirth")}
         <select value={cityName} onChange={(e) => setCityName(e.target.value)}>
           {CITIES.map((c) => (
             <option key={c.name} value={c.name}>
               {c.name}, {c.state}
             </option>
           ))}
-          <option value={CUSTOM_OPTION}>Custom coordinates...</option>
+          <option value={CUSTOM_OPTION}>{t("customCoordinates")}</option>
         </select>
       </label>
 
       {usingCustom && (
         <div className="custom-coords">
           <label>
-            Latitude
+            {t("latitude")}
             <input
               type="number"
               step="any"
@@ -115,7 +117,7 @@ export function BirthForm({ onSubmit }: Props) {
             />
           </label>
           <label>
-            Longitude
+            {t("longitude")}
             <input
               type="number"
               step="any"
@@ -128,7 +130,7 @@ export function BirthForm({ onSubmit }: Props) {
 
       {error && <p className="form-error">{error}</p>}
 
-      <button type="submit">Generate chart</button>
+      <button type="submit">{t("generateChart")}</button>
     </form>
   );
 }
