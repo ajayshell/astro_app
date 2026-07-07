@@ -14,6 +14,11 @@ export interface BirthInput {
 export interface PlanetSlot {
   planet: PlanetName;
   isRetrograde: boolean;
+  // Natal (D1) sidereal longitude. Divisional charts don't carry their own
+  // fractional degree in this model (a varga only resolves to a sign), so
+  // this is shown alongside varga/transit placements too, as a reference to
+  // the underlying birth data rather than a position within that chart.
+  siderealLongitude: number;
 }
 
 export interface PlanetPosition {

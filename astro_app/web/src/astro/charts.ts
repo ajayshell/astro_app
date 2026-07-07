@@ -61,7 +61,7 @@ export function buildPlacementMap(chart: ChartResult, vargaKind: VargaKind): Pla
   for (const p of chart.planets) {
     const rasi = vargaKind === "D1" ? p.rasi : p.vargas[vargaKind];
     map[rasi] = map[rasi] ?? [];
-    map[rasi].push({ planet: p.planet, isRetrograde: p.isRetrograde });
+    map[rasi].push({ planet: p.planet, isRetrograde: p.isRetrograde, siderealLongitude: p.siderealLongitude });
   }
   return map;
 }

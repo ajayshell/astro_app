@@ -61,6 +61,9 @@ export const UI_TEXT: Dict = {
     ta: "அட்சரேகை -90..90 மற்றும் தீர்க்கரேகை -180..180 க்குள் இருக்க வேண்டும்.",
   },
   tzError: { en: "Could not resolve time zone for this location.", ta: "இந்த இடத்திற்கான நேர மண்டலத்தை கண்டறிய முடியவில்லை." },
+  uccha: { en: "Uccha", ta: "உச்சம்" },
+  neecha: { en: "Neecha", ta: "நீசம்" },
+  retro: { en: "Retro", ta: "வக்ரம்" },
 };
 
 export const ASCENDANT_MARKER: { en: string; ta: string } = { en: "As", ta: "La" };
