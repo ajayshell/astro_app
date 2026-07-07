@@ -24,20 +24,12 @@ export function PlanetChip({ planet, isRetrograde, siderealLongitude, dignity }:
   };
 
   return (
-    <span
-      ref={setNodeRef}
-      style={style}
-      className={`planet-chip ${dignity ? `planet-chip-${dignity}` : ""}`}
-      {...listeners}
-      {...attributes}
-    >
-      <span className="planet-chip-name-row">
-        <span className="planet-chip-name">
-          {PLANET_ABBR[planet]}
-          {isRetrograde && <sup>R</sup>}
-        </span>
-        <span className="planet-chip-degree">{formatDegree(siderealLongitude)}</span>
+    <span ref={setNodeRef} style={style} className="planet-chip" {...listeners} {...attributes}>
+      <span className={`planet-chip-circle ${dignity ? `planet-chip-${dignity}` : ""}`}>
+        {PLANET_ABBR[planet]}
+        {isRetrograde && <sup>R</sup>}
       </span>
+      <span className="planet-chip-degree">{formatDegree(siderealLongitude)}</span>
       {(dignity || isRetrograde) && (
         <span className="planet-chip-tags">
           {dignity === "exalted" && <span className="planet-chip-tag tag-uccha">{t("uccha")}</span>}
