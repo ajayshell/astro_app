@@ -2,23 +2,15 @@ import { PLANET_ORDER } from "./constants";
 import { getAllTropicalLongitudes, julianDayUT } from "./ephemeris";
 import { lahiriAyanamsa } from "./ayanamsa";
 import { tropicalAscendant } from "./ascendant";
-import { normalizeDegrees } from "./util";
+import { localWallClockToUtc, normalizeDegrees } from "./util";
 import { IMPLEMENTED_VARGAS, computeVarga } from "./varga";
 import type { VargaKind } from "./varga";
 import type { BirthInput, ChartResult, PlanetPosition, PlanetSlot } from "./types";
 
 const NAKSHATRA_SPAN = 360 / 27;
 
-/** Resolves the birth-local wall-clock time + fixed UTC offset into a true UTC instant. */
-export function birthInputToUtcDate(input: BirthInput): Date {
-  const [year, month, day] = input.date.split("-").map(Number);
-  const [hour, minute] = input.time.split(":").map(Number);
-  const localAsUtcMillis = Date.UTC(year, month - 1, day, hour, minute, 0);
-  return new Date(localAsUtcMillis - input.timezoneOffsetHours * 60 * 60 * 1000);
-}
-
 export function computeChart(input: BirthInput): ChartResult {
-  const birthUtc = birthInputToUtcDate(input);
+  const birthUtc = localWallClockToUtc(input.date, input.time, input.timezoneOffsetHours);
   const jd = julianDayUT(birthUtc);
   const ayanamsa = lahiriAyanamsa(jd);
 

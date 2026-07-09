@@ -67,6 +67,28 @@ export const UI_TEXT: Dict = {
   uccha: { en: "Uccha", ta: "உச்சம்" },
   neecha: { en: "Neecha", ta: "நீசம்" },
   retro: { en: "Retro", ta: "வக்ரம்" },
+  tabHoroscope: { en: "Horoscope", ta: "ஜாதகம்" },
+  tabJamakol: { en: "Jamakol", ta: "ஜாமக்கோளம்" },
+  jamakolTitle: { en: "Jamakol Chart", ta: "ஜாமக்கோள ஜாதகம்" },
+  jamakolSubtitle: {
+    en: "Jamakol (8-fold sunrise-to-sunrise division) — for astrologer review",
+    ta: "ஜாமக்கோளம் (சூரிய உதயம் முதல் அடுத்த உதயம் வரை 8 பிரிவுகள்) — ஜோதிடர் ஆய்விற்காக",
+  },
+  jamakolWarning: {
+    en: "Unverified: this uses a best-effort planetary-hours-style rule, not a confirmed Jamakol formula. Do not rely on this for real timing decisions until an astrologer checks it.",
+    ta: "சரிபார்க்கப்படவில்லை: இது உறுதி செய்யப்படாத ஒரு தோராய முறையைப் பயன்படுத்துகிறது. ஜோதிடர் உறுதிப்படுத்தும் வரை இதை நம்பி முடிவெடுக்க வேண்டாம்.",
+  },
+  dateAndTime: { en: "Date and time", ta: "தேதி மற்றும் நேரம்" },
+  generate: { en: "Generate", ta: "உருவாக்கு" },
+  useNow: { en: "Use current time", ta: "தற்போதைய நேரத்தைப் பயன்படுத்து" },
+  jamam: { en: "Jamam", ta: "ஜாமம்" },
+  dayLabel: { en: "Day", ta: "பகல்" },
+  nightLabel: { en: "Night", ta: "இரவு" },
+  currentJamam: { en: "Current", ta: "தற்போதைய" },
+  sunriseLabel: { en: "Sunrise", ta: "சூரிய உதயம்" },
+  sunsetLabel: { en: "Sunset", ta: "சூரிய அஸ்தமனம்" },
+  nextSunriseLabel: { en: "Next sunrise", ta: "அடுத்த சூரிய உதயம்" },
+  weekdayLordLabel: { en: "Weekday lord", ta: "வார அதிபதி" },
 };
 
 export const ASCENDANT_MARKER: { en: string; ta: string } = { en: "As", ta: "La" };
