@@ -7,6 +7,7 @@ import { buildPlacementMap } from "../astro/charts";
 import { computeVarga } from "../astro/varga";
 import type { VargaKind } from "../astro/varga";
 import type { PlanetName } from "../astro/constants";
+import type { CenterInfo } from "../astro/format";
 import type { ChartResult, PlanetSlot } from "../astro/types";
 
 type ChartStyle = "south" | "north";
@@ -16,10 +17,11 @@ interface Props {
   chart: ChartResult;
   vargaKind: VargaKind;
   chartStyle: ChartStyle;
+  centerInfo?: CenterInfo;
 }
 
 /** A single interactive chart (D1/D9/transit/etc.), with its own drag-and-drop state. */
-export function ChartPanel({ title, chart, vargaKind, chartStyle }: Props) {
+export function ChartPanel({ title, chart, vargaKind, chartStyle, centerInfo }: Props) {
   const [placement, setPlacement] = useState<Record<number, PlanetSlot[]>>({});
 
   useEffect(() => {
@@ -54,13 +56,15 @@ export function ChartPanel({ title, chart, vargaKind, chartStyle }: Props) {
     });
   }
 
-  const ChartComponent = chartStyle === "south" ? SouthIndianChart : NorthIndianChart;
-
   return (
     <div className="chart-panel">
       <h4>{title}</h4>
       <DndContext onDragEnd={handleDragEnd}>
-        <ChartComponent ascendantRasi={ascendantRasi} placement={placement} />
+        {chartStyle === "south" ? (
+          <SouthIndianChart ascendantRasi={ascendantRasi} placement={placement} centerInfo={centerInfo} />
+        ) : (
+          <NorthIndianChart ascendantRasi={ascendantRasi} placement={placement} />
+        )}
       </DndContext>
     </div>
   );

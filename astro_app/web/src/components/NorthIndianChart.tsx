@@ -42,7 +42,6 @@ export function NorthIndianChart({ ascendantRasi, placement }: Props) {
             <RasiCell
               key={house}
               rasiIndex={rasi}
-              houseNumber={house}
               isAscendant={house === 1}
               planets={placement[rasi] ?? []}
               className="rasi-cell-diamond"

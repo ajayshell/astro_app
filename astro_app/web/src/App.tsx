@@ -9,7 +9,7 @@ import { computeVimshottariDasha } from "./astro/dasha";
 import type { DashaPeriod } from "./astro/dasha";
 import { IMPLEMENTED_VARGAS, PENDING_VARGAS } from "./astro/varga";
 import type { VargaKind } from "./astro/varga";
-import { formatDegree } from "./astro/format";
+import { formatBirthSummary, formatDegree } from "./astro/format";
 import { useI18n } from "./i18n/LanguageContext";
 import type { Language } from "./i18n/translations";
 import "./App.css";
@@ -29,6 +29,8 @@ function App() {
     if (!birthInput) return null;
     return computeTransitChart(birthInput);
   }, [birthInput]);
+
+  const centerInfo = useMemo(() => (birthInput ? formatBirthSummary(birthInput) : undefined), [birthInput]);
 
   const dasha: DashaPeriod[] = useMemo(() => {
     if (!chart) return [];
@@ -141,14 +143,38 @@ function App() {
             <>
               {view === "overview" ? (
                 <div className="chart-panel-grid">
-                  <ChartPanel title={t("rasiD1")} chart={chart} vargaKind="D1" chartStyle={chartStyle} />
-                  <ChartPanel title={t("navamsaD9")} chart={chart} vargaKind="D9" chartStyle={chartStyle} />
+                  <ChartPanel
+                    title={t("rasiD1")}
+                    chart={chart}
+                    vargaKind="D1"
+                    chartStyle={chartStyle}
+                    centerInfo={centerInfo}
+                  />
+                  <ChartPanel
+                    title={t("navamsaD9")}
+                    chart={chart}
+                    vargaKind="D9"
+                    chartStyle={chartStyle}
+                    centerInfo={centerInfo}
+                  />
                   {transitChart && (
-                    <ChartPanel title={t("transit")} chart={transitChart} vargaKind="D1" chartStyle={chartStyle} />
+                    <ChartPanel
+                      title={t("transit")}
+                      chart={transitChart}
+                      vargaKind="D1"
+                      chartStyle={chartStyle}
+                      centerInfo={centerInfo}
+                    />
                   )}
                 </div>
               ) : (
-                <ChartPanel title={vargaKind} chart={chart} vargaKind={vargaKind} chartStyle={chartStyle} />
+                <ChartPanel
+                  title={vargaKind}
+                  chart={chart}
+                  vargaKind={vargaKind}
+                  chartStyle={chartStyle}
+                  centerInfo={centerInfo}
+                />
               )}
               <p className="hint">{t("dragHint")}</p>
 

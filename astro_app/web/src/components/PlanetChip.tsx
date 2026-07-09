@@ -25,7 +25,7 @@ export function PlanetChip({ planet, isRetrograde, siderealLongitude, dignity }:
 
   return (
     <span ref={setNodeRef} style={style} className="planet-chip" {...listeners} {...attributes}>
-      <span className={`planet-chip-circle ${dignity ? `planet-chip-${dignity}` : ""}`}>
+      <span className={`planet-chip-name ${dignity ? `planet-chip-${dignity}` : ""}`}>
         {PLANET_ABBR[planet]}
         {isRetrograde && <sup>R</sup>}
       </span>

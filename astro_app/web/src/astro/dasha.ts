@@ -8,11 +8,14 @@ import type { PlanetName } from "./constants";
 const NAKSHATRA_SPAN = 360 / 27;
 const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
 
+// 0 = Dasha (Mahadasha), 1 = Bhukti (Antardasha), 2 = Antharam (Pratyantardasha).
+const MAX_DEPTH = 2;
+
 export interface DashaPeriod {
   lord: PlanetName;
   start: Date;
   end: Date;
-  antardashas: DashaPeriod[];
+  subPeriods: DashaPeriod[];
 }
 
 function addYears(date: Date, years: number): Date {
@@ -23,26 +26,37 @@ export function moonNakshatraIndex(moonSiderealLongitude: number): number {
   return Math.floor(moonSiderealLongitude / NAKSHATRA_SPAN) % 27;
 }
 
-function buildAntardashas(lord: PlanetName, start: Date, end: Date): DashaPeriod[] {
-  const mahaDurationYears = (end.getTime() - start.getTime()) / MS_PER_YEAR;
+/**
+ * Builds the 9-lord cycle of sub-periods within [start, end], each lasting a
+ * proportional share of the parent span (same rule at every level: Bhukti
+ * within a Dasha, Antharam within a Bhukti). Recurses down to `MAX_DEPTH`.
+ */
+function buildSubPeriods(lord: PlanetName, start: Date, end: Date, depth: number): DashaPeriod[] {
+  const durationYears = (end.getTime() - start.getTime()) / MS_PER_YEAR;
   const startIndex = VIMSHOTTARI_ORDER.indexOf(lord);
-  const antardashas: DashaPeriod[] = [];
+  const periods: DashaPeriod[] = [];
   let cursor = start;
   for (let i = 0; i < 9; i++) {
-    const antarLord = VIMSHOTTARI_ORDER[(startIndex + i) % 9];
-    const antarYears = mahaDurationYears * (VIMSHOTTARI_YEARS[antarLord] / VIMSHOTTARI_TOTAL_YEARS);
-    const antarEnd = addYears(cursor, antarYears);
-    antardashas.push({ lord: antarLord, start: cursor, end: antarEnd, antardashas: [] });
-    cursor = antarEnd;
+    const subLord = VIMSHOTTARI_ORDER[(startIndex + i) % 9];
+    const subYears = durationYears * (VIMSHOTTARI_YEARS[subLord] / VIMSHOTTARI_TOTAL_YEARS);
+    const subEnd = addYears(cursor, subYears);
+    periods.push({
+      lord: subLord,
+      start: cursor,
+      end: subEnd,
+      subPeriods: depth < MAX_DEPTH ? buildSubPeriods(subLord, cursor, subEnd, depth + 1) : [],
+    });
+    cursor = subEnd;
   }
-  return antardashas;
+  return periods;
 }
 
 /**
- * Vimshottari mahadasha sequence (with nested antardashas) starting at birth.
- * `cycles` controls how many full 120-year sweeps of the 9-lord cycle to generate
- * (1 is enough to cover a lifetime; the first mahadasha is a partial balance
- * based on how far the Moon had already moved through its birth nakshatra).
+ * Vimshottari Dasha sequence (with nested Bhukti and Antharam) starting at
+ * birth. `cycles` controls how many full 120-year sweeps of the 9-lord cycle
+ * to generate (1 is enough to cover a lifetime; the first Dasha is a partial
+ * balance based on how far the Moon had already moved through its birth
+ * nakshatra).
  */
 export function computeVimshottariDasha(
   moonSiderealLongitude: number,
@@ -64,7 +78,7 @@ export function computeVimshottariDasha(
     lord: firstLord,
     start: cursor,
     end: firstEnd,
-    antardashas: buildAntardashas(firstLord, cursor, firstEnd),
+    subPeriods: buildSubPeriods(firstLord, cursor, firstEnd, 1),
   });
   cursor = firstEnd;
 
@@ -73,7 +87,7 @@ export function computeVimshottariDasha(
     const lord = VIMSHOTTARI_ORDER[(startLordIndex + i) % 9];
     const years = VIMSHOTTARI_YEARS[lord];
     const end = addYears(cursor, years);
-    periods.push({ lord, start: cursor, end, antardashas: buildAntardashas(lord, cursor, end) });
+    periods.push({ lord, start: cursor, end, subPeriods: buildSubPeriods(lord, cursor, end, 1) });
     cursor = end;
   }
 

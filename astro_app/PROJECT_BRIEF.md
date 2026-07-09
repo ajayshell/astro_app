@@ -63,6 +63,14 @@ Code lives in `astro_app/web` (React + TypeScript + Vite). Run with `npm install
 
 **Fixed: Ascendant (Lagna) was 180 degrees off.** The astrologer caught this directly: for the 1979-06-29 08:21 Bengaluru chart, the app was placing Lagna where it should have placed the 7th-house cusp (Capricorn instead of the correct Cancer). Root cause was in the Ascendant formula (`web/src/astro/ascendant.ts`) — the `atan2` solution resolves the right *line* through the ecliptic but doesn't reliably pick Ascendant over Descendant (they're 180 degrees apart and satisfy the same tangent equation); the code needed an explicit `+ 180` to land on the correct one. This is a **major correctness fix** — every chart generated before this fix had ascendant, and therefore every whole-sign house, wrong. Please spot-check a couple more known charts against this build to confirm it now holds generally.
 
+**Chart grid, redesigned per feedback:**
+- Removed house numbers (H1, H2...) from every cell — signs/houses are identified by sign name and the As/La marker only.
+- Planet names are now plain colored text (no circular badge); a subtle green/red tint marks Uccha/Neecha on the name itself, in addition to the tag below it.
+- The South Indian chart's decorative center cross (added last round) is gone — the center block now shows the birth date, time, and place instead, matching how many real South Indian charts caption themselves.
+- Charts are drawn much larger, and cells no longer clip conjunct planets in the normal case. A cell can still scroll internally as a last resort in the tightest context (the 3-up Overview grid with several conjunct + retrograde + debilitated planets stacked in one sign) rather than let content spill outside the chart entirely — that spillover was a real bug caught while implementing this, now fixed.
+
+**Vimshottari Dasha now goes 3 levels deep: Dasha / Bhukti / Antharam** (Mahadasha / Antardasha / Pratyantardasha), each level labeled and progressively indented, expand/collapse per row. Same proportional-duration rule applied recursively at each level.
+
 **Needs the astrologer's sign-off before it's trustworthy, in priority order:**
 1. **Ayanamsa formula** — currently a linear approximation to Lahiri/Chitrapaksha (anchored at J2000, ~50"/year drift), not the full Swiss Ephemeris precession model. Likely accurate to within an arcminute, but should be checked against a few known charts. See `web/src/astro/ayanamsa.ts`.
 2. **Remaining divisional charts** — D4, D6, D7, D16, D20, D24, D27, D30, D40, D45, D60 are not implemented yet. Several (e.g. D3, D7) have more than one traditional counting method — need the astrologer's preferred rule for each before encoding them.

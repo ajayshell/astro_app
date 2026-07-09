@@ -6,14 +6,13 @@ import { useI18n } from "../i18n/LanguageContext";
 
 interface Props {
   rasiIndex: number;
-  houseNumber: number | null;
   isAscendant: boolean;
   planets: { planet: PlanetName; isRetrograde: boolean; siderealLongitude: number }[];
   className?: string;
   style?: React.CSSProperties;
 }
 
-export function RasiCell({ rasiIndex, houseNumber, isAscendant, planets, className, style }: Props) {
+export function RasiCell({ rasiIndex, isAscendant, planets, className, style }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: `rasi-${rasiIndex}` });
   const { rasiLabel, ascendantMarker } = useI18n();
 
@@ -25,7 +24,6 @@ export function RasiCell({ rasiIndex, houseNumber, isAscendant, planets, classNa
     >
       <div className="rasi-cell-header">
         <span className="rasi-sign-label">{rasiLabel(rasiIndex)}</span>
-        {houseNumber !== null && <span className="rasi-house-number">H{houseNumber}</span>}
         {isAscendant && <span className="rasi-asc-marker">{ascendantMarker()}</span>}
       </div>
       <div className="rasi-cell-planets">
