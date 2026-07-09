@@ -63,7 +63,51 @@ function App() {
       </header>
 
       <div className="app-body">
-        <aside className="sidebar">
+        <section className="charts-row">
+          {chart ? (
+            view === "overview" ? (
+              <div className="chart-panel-grid">
+                <ChartPanel
+                  title={t("rasiD1")}
+                  chart={chart}
+                  vargaKind="D1"
+                  chartStyle={chartStyle}
+                  centerInfo={centerInfo}
+                />
+                <ChartPanel
+                  title={t("navamsaD9")}
+                  chart={chart}
+                  vargaKind="D9"
+                  chartStyle={chartStyle}
+                  centerInfo={centerInfo}
+                />
+                {transitChart && (
+                  <ChartPanel
+                    title={t("transit")}
+                    chart={transitChart}
+                    vargaKind="D1"
+                    chartStyle={chartStyle}
+                    centerInfo={centerInfo}
+                  />
+                )}
+              </div>
+            ) : (
+              <ChartPanel
+                title={vargaKind}
+                chart={chart}
+                vargaKind={vargaKind}
+                chartStyle={chartStyle}
+                centerInfo={centerInfo}
+              />
+            )
+          ) : (
+            <p className="placeholder">{t("enterBirthDetails")}</p>
+          )}
+        </section>
+
+        {chart && <p className="hint">{t("dragHint")}</p>}
+
+        <div className="below-row">
           <BirthForm onSubmit={handleBirthSubmit} />
 
           {chart && (
@@ -136,59 +180,18 @@ function App() {
               </table>
             </div>
           )}
-        </aside>
+        </div>
 
-        <main className="chart-area">
-          {chart ? (
-            <>
-              {view === "overview" ? (
-                <div className="chart-panel-grid">
-                  <ChartPanel
-                    title={t("rasiD1")}
-                    chart={chart}
-                    vargaKind="D1"
-                    chartStyle={chartStyle}
-                    centerInfo={centerInfo}
-                  />
-                  <ChartPanel
-                    title={t("navamsaD9")}
-                    chart={chart}
-                    vargaKind="D9"
-                    chartStyle={chartStyle}
-                    centerInfo={centerInfo}
-                  />
-                  {transitChart && (
-                    <ChartPanel
-                      title={t("transit")}
-                      chart={transitChart}
-                      vargaKind="D1"
-                      chartStyle={chartStyle}
-                      centerInfo={centerInfo}
-                    />
-                  )}
-                </div>
-              ) : (
-                <ChartPanel
-                  title={vargaKind}
-                  chart={chart}
-                  vargaKind={vargaKind}
-                  chartStyle={chartStyle}
-                  centerInfo={centerInfo}
-                />
-              )}
-              <p className="hint">{t("dragHint")}</p>
+        {chart && (
+          <>
+            <CharaKarakaTable chart={chart} />
 
-              <CharaKarakaTable chart={chart} />
-
-              <section className="dasha-section">
-                <h3>{t("dashaTitle")}</h3>
-                <DashaTable periods={dasha} />
-              </section>
-            </>
-          ) : (
-            <p className="placeholder">{t("enterBirthDetails")}</p>
-          )}
-        </main>
+            <section className="dasha-section">
+              <h3>{t("dashaTitle")}</h3>
+              <DashaTable periods={dasha} />
+            </section>
+          </>
+        )}
       </div>
     </div>
   );

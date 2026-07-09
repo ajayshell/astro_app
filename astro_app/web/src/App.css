@@ -50,30 +50,31 @@ header h1 {
 }
 
 .app-body {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
   margin-top: 1.25rem;
 }
 
-.sidebar {
-  flex: 1 1 300px;
-  min-width: 260px;
-  max-width: 380px;
+.charts-row {
+  display: flex;
+  justify-content: center;
 }
 
-.chart-area {
-  flex: 2 1 480px;
-  min-width: 320px;
+.below-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-top: 1.5rem;
 }
 
 .birth-form, .controls, .summary {
+  flex: 1 1 280px;
+  min-width: 260px;
+  max-width: 380px;
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-top: 3px solid var(--accent);
   border-radius: 10px;
   padding: 1.1rem 1.15rem;
-  margin-bottom: 1.15rem;
   box-shadow: var(--shadow);
 }
 
@@ -327,8 +328,8 @@ header h1 {
   gap: 1.5rem;
 }
 
-/* Solo (Explore mode) charts use the full width chart-area gives them, up to
-   the chart's own max-width. Only the 3-up overview grid needs a per-panel cap. */
+/* Solo (Explore mode) charts use the full width of .charts-row, up to the
+   chart's own max-width. Only the 3-up overview grid needs a per-panel cap. */
 .chart-panel-grid .chart-panel {
   flex: 1 1 340px;
   min-width: 340px;
