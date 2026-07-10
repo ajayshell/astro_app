@@ -16,12 +16,9 @@
  * - Count from Udayam's rasi, clockwise, SVC squares -- the sign landed on
  *   gets marked "Kavippu".
  *
- * Counting convention (assumed, not spelled out in the rule text): the rule
- * doesn't say whether the starting sign counts as 1 or 0. Reused the same
- * inclusive "starting sign = count 1" convention the Aarudom rule spells out
- * explicitly (see aarudom.ts) for both counting steps here, since it's the
- * one confirmed counting style already given for this chart. Flag if Soorya
- * Veedhi is meant to count exclusively (starting sign = 0 steps) instead.
+ * Counting convention: inclusive -- the starting sign counts as 1, same as
+ * the Aarudom rule (see aarudom.ts). Confirmed by the astrologer for both
+ * counting steps here.
  */
 
 const MESHA = 0;
