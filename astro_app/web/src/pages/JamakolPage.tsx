@@ -11,17 +11,32 @@ import { useI18n } from "../i18n/LanguageContext";
 const CUSTOM_OPTION = "__custom__";
 const DEFAULT_CITY = "Bengaluru";
 
-// Anti-clockwise from top-left, in a 3x3 grid with the center reserved for
-// the date/time/place caption -- ringPosition is index-aligned to jamakol.ts's RING_ORDER.
+// Anti-clockwise from the top-left corner, in a 6x6 grid: the 8 ring boxes
+// sit at the 4 corners + 4 edge positions (NOT edge midpoints -- traced from
+// a reference screenshot, the edge boxes are offset in a rotationally
+// symmetric pattern: top at col3, bottom at col4, right at row3, left at
+// row4). The inner 4x4 (rows 2-5, cols 2-5) is a separate area, structured
+// like a South Indian chart (12 perimeter cells + a 2x2 center for
+// date/time), currently blank pending rules for what goes in those cells.
+// ringPosition is index-aligned to jamakol.ts's RING_ORDER.
 const RING_POSITIONS: { row: number; col: number }[] = [
-  { row: 1, col: 1 }, // 0: top-left
-  { row: 2, col: 1 }, // 1: mid-left
-  { row: 3, col: 1 }, // 2: bottom-left
-  { row: 3, col: 2 }, // 3: bottom-mid
-  { row: 3, col: 3 }, // 4: bottom-right
-  { row: 2, col: 3 }, // 5: mid-right
-  { row: 1, col: 3 }, // 6: top-right
-  { row: 1, col: 2 }, // 7: top-mid
+  { row: 1, col: 1 }, // 0: top-left corner
+  { row: 4, col: 1 }, // 1: left edge
+  { row: 6, col: 1 }, // 2: bottom-left corner
+  { row: 6, col: 4 }, // 3: bottom edge
+  { row: 6, col: 6 }, // 4: bottom-right corner
+  { row: 3, col: 6 }, // 5: right edge
+  { row: 1, col: 6 }, // 6: top-right corner
+  { row: 1, col: 3 }, // 7: top edge
+];
+
+// The 12 inner cells (South-Indian-chart-style perimeter of the 4x4 inner
+// block) with no confirmed content yet -- rendered blank as placeholders.
+const INNER_BLANK_CELLS: { row: number; col: number }[] = [
+  { row: 2, col: 2 }, { row: 2, col: 3 }, { row: 2, col: 4 }, { row: 2, col: 5 },
+  { row: 3, col: 2 }, { row: 3, col: 5 },
+  { row: 4, col: 2 }, { row: 4, col: 5 },
+  { row: 5, col: 2 }, { row: 5, col: 3 }, { row: 5, col: 4 }, { row: 5, col: 5 },
 ];
 
 function fmtTime(d: Date, zoneName: string): string {
@@ -117,11 +132,14 @@ export function JamakolPage() {
         <section className="charts-row">
           {result && (
             <div className="jamakol-grid">
-              <div className="jamakol-center">
+              <div className="jamakol-center" style={{ gridRow: "3 / span 2", gridColumn: "3 / span 2" }}>
                 <span>{date.split("-").reverse().join("-")}</span>
                 <span>{time}</span>
                 <span>{placeLabel}</span>
               </div>
+              {INNER_BLANK_CELLS.map((pos, i) => (
+                <div key={i} className="jamakol-inner-cell" style={{ gridRow: pos.row, gridColumn: pos.col }} />
+              ))}
               {result.periods.map((p) => {
                 const pos = RING_POSITIONS[p.ringPosition];
                 const isCurrent = result.periods.indexOf(p) === result.currentIndex;
