@@ -16,6 +16,8 @@ import { SOUTH_INDIAN_GRID_POSITIONS } from "../astro/southIndianGrid";
 import { computeAarudomRasi } from "../astro/aarudom";
 import { computeUdayam } from "../astro/udayam";
 import type { UdayamCalc } from "../astro/udayam";
+import { computeSooryaVeedhi } from "../astro/sooryaVeedhi";
+import type { SooryaVeedhiCalc } from "../astro/sooryaVeedhi";
 import { RasiCell } from "../components/RasiCell";
 import { useI18n } from "../i18n/LanguageContext";
 
@@ -64,6 +66,7 @@ export function JamakolPage() {
   const [placement, setPlacement] = useState<Record<number, PlanetSlot[]>>({});
   const [aarudomRasi, setAarudomRasi] = useState<number | null>(null);
   const [udayam, setUdayam] = useState<UdayamCalc | null>(null);
+  const [sooryaVeedhi, setSooryaVeedhi] = useState<SooryaVeedhiCalc | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const usingCustom = cityName === CUSTOM_OPTION;
@@ -112,9 +115,12 @@ export function JamakolPage() {
       });
       setChart(newChart);
       setPlacement(buildPlacementMap(newChart, "D1"));
-      setAarudomRasi(computeAarudomRasi(Number(timeStr.split(":")[1])));
-      const sun = newChart.planets.find((p) => p.planet === "Sun");
-      setUdayam(computeUdayam(referenceInstant, jamakolResult.sunrise, jamakolResult.sunset, sun!.siderealLongitude));
+      const aarudom = computeAarudomRasi(Number(timeStr.split(":")[1]));
+      setAarudomRasi(aarudom);
+      const sun = newChart.planets.find((p) => p.planet === "Sun")!;
+      const udayamCalc = computeUdayam(referenceInstant, jamakolResult.sunrise, jamakolResult.sunset, sun.siderealLongitude);
+      setUdayam(udayamCalc);
+      setSooryaVeedhi(computeSooryaVeedhi(sun.rasi, aarudom, udayamCalc.rasiIndex));
       setPlaceLabel(placeName);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("tzError"));
@@ -215,6 +221,7 @@ export function JamakolPage() {
                     isAscendant={rasi === chart.ascendantRasi}
                     isAarudom={rasi === aarudomRasi}
                     isUdayam={rasi === udayam?.rasiIndex}
+                    isKavippu={rasi === sooryaVeedhi?.kavippuRasi}
                     planets={placement[rasi] ?? []}
                     style={{ gridRow: row, gridColumn: col }}
                   />

@@ -1,0 +1,13 @@
+Rule for Soorya Veedhi:
+Rule 1: Rishaba, Mituna, Kadaga, Simha <-- these four raasi are called mesha veedhi
+Rule 2: Kanni, Thula, Meena, Mesha <-- these four are called rishaba raasi
+Rule 3: Virchigam, Dhanush, Magara, Kumba <-- these are called mithuna veedhi
+
+- Find the Raasi in which Surya is placed in D1
+- If it is in Rule 1, then count from Aarudum clockwise to Mesha
+- If it is in Rule 2, then count from Aarudum clockwise to Rishaba
+- If it is in Rule 3, then count from Aarudum clockwise to mituna
+The result should be called Soorya Veedhi Count (SVC)
+
+
+Next, count from Udayam, clockwise for SVC number of squares and then write 'Kavippu' in that square.

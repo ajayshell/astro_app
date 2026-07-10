@@ -93,6 +93,7 @@ export const UI_TEXT: Dict = {
   maandi: { en: "Maandi", ta: "மாந்தி" },
   aarudom: { en: "Aarudom", ta: "ஆரூடம்" },
   udayam: { en: "Udayam", ta: "உதயம்" },
+  kavippu: { en: "Kavippu", ta: "கவிப்பு" },
   udayamDebugTitle: { en: "Udayam calculation (debug)", ta: "உதயம் கணக்கீடு (சரிபார்ப்பு)" },
   udayamS: { en: "S (minutes from sunrise)", ta: "S (உதயத்திலிருந்து நிமிடங்கள்)" },
   udayamD: { en: "D (minutes/degree)", ta: "D (நிமிடம்/பாகை)" },

@@ -322,6 +322,11 @@ header h1 {
   font-weight: 700;
 }
 
+.rasi-kavippu-marker {
+  color: #dc2626;
+  font-weight: 700;
+}
+
 .rasi-cell-planets {
   display: flex;
   flex-wrap: wrap;
