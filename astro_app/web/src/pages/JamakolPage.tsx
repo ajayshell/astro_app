@@ -13,6 +13,7 @@ import type { ChartResult } from "../astro/types";
 import type { PlanetName } from "../astro/constants";
 import type { PlanetSlot } from "../astro/types";
 import { SOUTH_INDIAN_GRID_POSITIONS } from "../astro/southIndianGrid";
+import { computeAarudomRasi } from "../astro/aarudom";
 import { RasiCell } from "../components/RasiCell";
 import { useI18n } from "../i18n/LanguageContext";
 
@@ -59,6 +60,7 @@ export function JamakolPage() {
   const [result, setResult] = useState<JamakolResult | null>(null);
   const [chart, setChart] = useState<ChartResult | null>(null);
   const [placement, setPlacement] = useState<Record<number, PlanetSlot[]>>({});
+  const [aarudomRasi, setAarudomRasi] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const usingCustom = cityName === CUSTOM_OPTION;
@@ -106,6 +108,7 @@ export function JamakolPage() {
       });
       setChart(newChart);
       setPlacement(buildPlacementMap(newChart, "D1"));
+      setAarudomRasi(computeAarudomRasi(Number(timeStr.split(":")[1])));
       setPlaceLabel(placeName);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("tzError"));
@@ -204,6 +207,7 @@ export function JamakolPage() {
                     key={rasi}
                     rasiIndex={rasi}
                     isAscendant={rasi === chart.ascendantRasi}
+                    isAarudom={rasi === aarudomRasi}
                     planets={placement[rasi] ?? []}
                     style={{ gridRow: row, gridColumn: col }}
                   />

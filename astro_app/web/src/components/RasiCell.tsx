@@ -9,6 +9,7 @@ interface Props {
   houseNumber?: number | null;
   showHouseNumber?: boolean;
   isAscendant: boolean;
+  isAarudom?: boolean;
   planets: { planet: PlanetName; isRetrograde: boolean; siderealLongitude: number }[];
   className?: string;
   style?: React.CSSProperties;
@@ -19,12 +20,13 @@ export function RasiCell({
   houseNumber = null,
   showHouseNumber = false,
   isAscendant,
+  isAarudom = false,
   planets,
   className,
   style,
 }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: `rasi-${rasiIndex}` });
-  const { rasiLabel, ascendantMarker } = useI18n();
+  const { t, rasiLabel, ascendantMarker } = useI18n();
 
   return (
     <div
@@ -36,6 +38,7 @@ export function RasiCell({
         <span className="rasi-sign-label">{rasiLabel(rasiIndex)}</span>
         {showHouseNumber && houseNumber !== null && <span className="rasi-house-number">H{houseNumber}</span>}
         {isAscendant && <span className="rasi-asc-marker">{ascendantMarker()}</span>}
+        {isAarudom && <span className="rasi-aarudom-marker">{t("aarudom")}</span>}
       </div>
       <div className="rasi-cell-planets">
         {planets.map((p) => (

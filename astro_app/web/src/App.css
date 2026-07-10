@@ -255,6 +255,11 @@ header h1 {
   font-weight: 700;
 }
 
+.rasi-aarudom-marker {
+  color: #7c3aed;
+  font-weight: 700;
+}
+
 .rasi-cell-planets {
   display: flex;
   flex-wrap: wrap;

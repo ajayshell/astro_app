@@ -91,6 +91,7 @@ export const UI_TEXT: Dict = {
   weekdayLordLabel: { en: "Weekday lord", ta: "வார அதிபதி" },
   showHouseNumbers: { en: "Show house numbers", ta: "வீட்டு எண்களைக் காட்டு" },
   maandi: { en: "Maandi", ta: "மாந்தி" },
+  aarudom: { en: "Aarudom", ta: "ஆரூடம்" },
 };
 
 export const ASCENDANT_MARKER: { en: string; ta: string } = { en: "As", ta: "La" };
