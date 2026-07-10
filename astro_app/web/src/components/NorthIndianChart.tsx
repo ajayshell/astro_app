@@ -5,6 +5,7 @@ interface Props {
   ascendantRasi: number;
   placement: Record<number, { planet: PlanetName; isRetrograde: boolean }[]>;
   showHouseNumber?: boolean;
+  draggable?: boolean;
 }
 
 // House layout goes clockwise from the top (house 1), matching the common
@@ -27,7 +28,7 @@ const HOUSE_ANCHORS: { house: number; x: number; y: number }[] = [
   { house: 12, x: 100, y: 40 },
 ];
 
-export function NorthIndianChart({ ascendantRasi, placement, showHouseNumber }: Props) {
+export function NorthIndianChart({ ascendantRasi, placement, showHouseNumber, draggable }: Props) {
   return (
     <div className="north-indian-wrap">
       <svg viewBox="0 0 400 400" className="north-indian-svg">
@@ -49,6 +50,7 @@ export function NorthIndianChart({ ascendantRasi, placement, showHouseNumber }: 
               planets={placement[rasi] ?? []}
               className="rasi-cell-diamond"
               style={{ left: `${(x / 400) * 100}%`, top: `${(y / 400) * 100}%` }}
+              draggable={draggable}
             />
           );
         })}

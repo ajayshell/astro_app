@@ -9,11 +9,13 @@ interface Props {
   isRetrograde: boolean;
   siderealLongitude: number;
   dignity: Dignity;
+  draggable?: boolean;
 }
 
-export function PlanetChip({ planet, isRetrograde, siderealLongitude, dignity }: Props) {
+export function PlanetChip({ planet, isRetrograde, siderealLongitude, dignity, draggable = true }: Props) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: planet,
+    disabled: !draggable,
   });
   const { t } = useI18n();
 
@@ -21,10 +23,17 @@ export function PlanetChip({ planet, isRetrograde, siderealLongitude, dignity }:
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     zIndex: isDragging ? 100 : undefined,
     opacity: isDragging ? 0.6 : 1,
+    cursor: draggable ? "grab" : "default",
   };
 
   return (
-    <span ref={setNodeRef} style={style} className="planet-chip" {...listeners} {...attributes}>
+    <span
+      ref={setNodeRef}
+      style={style}
+      className="planet-chip"
+      {...(draggable ? listeners : {})}
+      {...(draggable ? attributes : {})}
+    >
       <span className={`planet-chip-name ${dignity ? `planet-chip-${dignity}` : ""}`}>
         {PLANET_ABBR[planet]}
         {isRetrograde && <sup>R</sup>}

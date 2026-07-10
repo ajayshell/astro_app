@@ -14,6 +14,7 @@ interface Props {
   planets: { planet: PlanetName; isRetrograde: boolean; siderealLongitude: number }[];
   className?: string;
   style?: React.CSSProperties;
+  draggable?: boolean;
 }
 
 export function RasiCell({
@@ -26,6 +27,7 @@ export function RasiCell({
   planets,
   className,
   style,
+  draggable = true,
 }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: `rasi-${rasiIndex}` });
   const { t, rasiLabel, ascendantMarker } = useI18n();
@@ -51,6 +53,7 @@ export function RasiCell({
             isRetrograde={p.isRetrograde}
             siderealLongitude={p.siderealLongitude}
             dignity={getDignity(p.planet, rasiIndex)}
+            draggable={draggable}
           />
         ))}
       </div>

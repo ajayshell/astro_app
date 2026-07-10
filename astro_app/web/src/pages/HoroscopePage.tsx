@@ -109,8 +109,6 @@ export function HoroscopePage() {
           )}
         </section>
 
-        {chart && <p className="hint">{t("dragHint")}</p>}
-
         <div className="below-row">
           <BirthForm onSubmit={handleBirthSubmit} />
 

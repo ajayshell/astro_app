@@ -60,6 +60,9 @@ export function ChartPanel({ title, chart, vargaKind, chartStyle, centerInfo, sh
   return (
     <div className="chart-panel">
       <h4>{title}</h4>
+      {/* Dragging is disabled on this page's charts (drag-and-drop is still
+          used on the Jamakol page's inner grid). Kept wired via `draggable`
+          rather than ripped out, in case it needs to come back later. */}
       <DndContext onDragEnd={handleDragEnd}>
         {chartStyle === "south" ? (
           <SouthIndianChart
@@ -67,9 +70,15 @@ export function ChartPanel({ title, chart, vargaKind, chartStyle, centerInfo, sh
             placement={placement}
             centerInfo={centerInfo}
             showHouseNumber={showHouseNumber}
+            draggable={false}
           />
         ) : (
-          <NorthIndianChart ascendantRasi={ascendantRasi} placement={placement} showHouseNumber={showHouseNumber} />
+          <NorthIndianChart
+            ascendantRasi={ascendantRasi}
+            placement={placement}
+            showHouseNumber={showHouseNumber}
+            draggable={false}
+          />
         )}
       </DndContext>
     </div>

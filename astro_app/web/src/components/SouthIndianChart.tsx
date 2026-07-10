@@ -9,9 +9,10 @@ interface Props {
   placement: Record<number, { planet: PlanetName; isRetrograde: boolean }[]>;
   centerInfo?: CenterInfo;
   showHouseNumber?: boolean;
+  draggable?: boolean;
 }
 
-export function SouthIndianChart({ ascendantRasi, placement, centerInfo, showHouseNumber }: Props) {
+export function SouthIndianChart({ ascendantRasi, placement, centerInfo, showHouseNumber, draggable }: Props) {
   return (
     <div className="south-indian-grid">
       {centerInfo && (
@@ -30,6 +31,7 @@ export function SouthIndianChart({ ascendantRasi, placement, centerInfo, showHou
           isAscendant={rasi === ascendantRasi}
           planets={placement[rasi] ?? []}
           style={{ gridRow: row, gridColumn: col }}
+          draggable={draggable}
         />
       ))}
     </div>
