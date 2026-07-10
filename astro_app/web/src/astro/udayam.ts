@@ -1,3 +1,5 @@
+import { normalizeDegrees } from "./util";
+
 /**
  * Udayam marking for the Jamakol chart's inner D1 grid.
  *
@@ -6,13 +8,15 @@
  *   D = (sunset - sunrise), in minutes, divided by 360 -- i.e. the minutes
  *       spanned by one degree if the whole daytime arc is mapped to 360deg.
  *   degrees forward = S / D (S minutes expressed as degrees using that rate).
- *   Starting from Aries (0 deg) and moving clockwise (increasing zodiac
- *   order) by that many degrees, 30 degrees per sign, mark whichever sign it
- *   lands in as Udayam.
  *
- * This read of the rule is the one interpretation that uses both S and D as
- * defined (S/D, converting elapsed minutes to degrees via the minutes-per-
- * degree rate D) -- flag if a different combination was intended.
+ * Starting point (per follow-up correction): NOT Aries 0 degrees -- the
+ * Sun's own current sidereal longitude. Add degreesForward to the Sun's
+ * longitude (standard increasing-longitude direction, same convention as
+ * every other sidereal position in this app) and mark whichever sign the
+ * result lands in as Udayam. Example worked through directly against the
+ * app's own output: Sun at 22d42' into Gemini (absolute ~82.7 deg) plus
+ * ~56.34 deg forward lands at ~139 deg, i.e. past all of Cancer and into
+ * Leo -- not simply "one sign forward".
  */
 export interface UdayamCalc {
   referenceInstant: Date;
@@ -22,17 +26,31 @@ export interface UdayamCalc {
   daytimeMinutes: number; // sunset - sunrise, in minutes
   D: number; // daytimeMinutes / 360 (minutes per degree)
   degreesForward: number; // S / D
-  rasiIndex: number; // 0 = Aries, floor(degreesForward / 30) mod 12
+  sunLongitude: number; // Sun's sidereal longitude at referenceInstant -- the starting point
+  destinationLongitude: number; // sunLongitude + degreesForward, normalized 0-360
+  rasiIndex: number; // floor(destinationLongitude / 30) mod 12
 }
 
-export function computeUdayam(referenceInstant: Date, sunrise: Date, sunset: Date): UdayamCalc {
+export function computeUdayam(referenceInstant: Date, sunrise: Date, sunset: Date, sunLongitude: number): UdayamCalc {
   const S = Math.abs(referenceInstant.getTime() - sunrise.getTime()) / 60000;
   const daytimeMinutes = (sunset.getTime() - sunrise.getTime()) / 60000;
   const D = daytimeMinutes / 360;
   const degreesForward = D !== 0 ? S / D : 0;
-  const rasiIndex = Math.floor(degreesForward / 30) % 12;
+  const destinationLongitude = normalizeDegrees(sunLongitude + degreesForward);
+  const rasiIndex = Math.floor(destinationLongitude / 30) % 12;
 
-  const calc: UdayamCalc = { referenceInstant, sunrise, sunset, S, daytimeMinutes, D, degreesForward, rasiIndex };
+  const calc: UdayamCalc = {
+    referenceInstant,
+    sunrise,
+    sunset,
+    S,
+    daytimeMinutes,
+    D,
+    degreesForward,
+    sunLongitude,
+    destinationLongitude,
+    rasiIndex,
+  };
 
   // Explicit log prints for testing/feedback, per request -- check the
   // browser console when trying different times.
@@ -40,7 +58,7 @@ export function computeUdayam(referenceInstant: Date, sunrise: Date, sunset: Dat
   console.log("[Udayam] reference:", referenceInstant.toISOString(), "sunrise:", sunrise.toISOString(), "sunset:", sunset.toISOString());
   // eslint-disable-next-line no-console
   console.log(
-    `[Udayam] S=${S.toFixed(2)} min, daytimeMinutes=${daytimeMinutes.toFixed(2)}, D=${D.toFixed(4)} min/deg, degreesForward=${degreesForward.toFixed(2)}, rasiIndex=${rasiIndex}`,
+    `[Udayam] S=${S.toFixed(2)} min, daytimeMinutes=${daytimeMinutes.toFixed(2)}, D=${D.toFixed(4)} min/deg, degreesForward=${degreesForward.toFixed(2)}, sunLongitude=${sunLongitude.toFixed(2)}, destinationLongitude=${destinationLongitude.toFixed(2)}, rasiIndex=${rasiIndex}`,
   );
 
   return calc;

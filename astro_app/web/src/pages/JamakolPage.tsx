@@ -101,7 +101,6 @@ export function JamakolPage() {
       setError(null);
       const jamakolResult = computeJamakol(referenceInstant, latitude, longitude);
       setResult(jamakolResult);
-      setUdayam(computeUdayam(referenceInstant, jamakolResult.sunrise, jamakolResult.sunset));
       const newChart = computeChart({
         name: "Jamakol",
         date: dateStr,
@@ -114,6 +113,8 @@ export function JamakolPage() {
       setChart(newChart);
       setPlacement(buildPlacementMap(newChart, "D1"));
       setAarudomRasi(computeAarudomRasi(Number(timeStr.split(":")[1])));
+      const sun = newChart.planets.find((p) => p.planet === "Sun");
+      setUdayam(computeUdayam(referenceInstant, jamakolResult.sunrise, jamakolResult.sunset, sun!.siderealLongitude));
       setPlaceLabel(placeName);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("tzError"));
@@ -299,6 +300,8 @@ export function JamakolPage() {
               <p>{t("udayamS")}: {udayam.S.toFixed(2)}</p>
               <p>{t("udayamD")}: {udayam.D.toFixed(4)}</p>
               <p>{t("udayamDegrees")}: {udayam.degreesForward.toFixed(2)}°</p>
+              <p>{t("udayamSunLongitude")}: {udayam.sunLongitude.toFixed(2)}°</p>
+              <p>{t("udayamDestination")}: {udayam.destinationLongitude.toFixed(2)}°</p>
               <p>{t("udayamSquare")}: {rasiFullName(udayam.rasiIndex)}</p>
             </div>
           )}

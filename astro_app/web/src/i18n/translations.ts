@@ -98,6 +98,8 @@ export const UI_TEXT: Dict = {
   udayamD: { en: "D (minutes/degree)", ta: "D (நிமிடம்/பாகை)" },
   udayamDegrees: { en: "Degrees forward", ta: "முன்னோக்கிய பாகைகள்" },
   udayamSquare: { en: "Landed square", ta: "விழும் கட்டம்" },
+  udayamSunLongitude: { en: "Sun longitude (start)", ta: "சூரிய பாகை (தொடக்கம்)" },
+  udayamDestination: { en: "Destination longitude", ta: "இலக்கு பாகை" },
 };
 
 export const ASCENDANT_MARKER: { en: string; ta: string } = { en: "As", ta: "La" };
