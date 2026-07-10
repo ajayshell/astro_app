@@ -92,6 +92,12 @@ export const UI_TEXT: Dict = {
   showHouseNumbers: { en: "Show house numbers", ta: "வீட்டு எண்களைக் காட்டு" },
   maandi: { en: "Maandi", ta: "மாந்தி" },
   aarudom: { en: "Aarudom", ta: "ஆரூடம்" },
+  udayam: { en: "Udayam", ta: "உதயம்" },
+  udayamDebugTitle: { en: "Udayam calculation (debug)", ta: "உதயம் கணக்கீடு (சரிபார்ப்பு)" },
+  udayamS: { en: "S (minutes from sunrise)", ta: "S (உதயத்திலிருந்து நிமிடங்கள்)" },
+  udayamD: { en: "D (minutes/degree)", ta: "D (நிமிடம்/பாகை)" },
+  udayamDegrees: { en: "Degrees forward", ta: "முன்னோக்கிய பாகைகள்" },
+  udayamSquare: { en: "Landed square", ta: "விழும் கட்டம்" },
 };
 
 export const ASCENDANT_MARKER: { en: string; ta: string } = { en: "As", ta: "La" };

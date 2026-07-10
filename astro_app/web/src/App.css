@@ -260,6 +260,11 @@ header h1 {
   font-weight: 700;
 }
 
+.rasi-udayam-marker {
+  color: #0d9488;
+  font-weight: 700;
+}
+
 .rasi-cell-planets {
   display: flex;
   flex-wrap: wrap;

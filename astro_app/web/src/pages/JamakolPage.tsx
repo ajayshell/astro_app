@@ -14,6 +14,8 @@ import type { PlanetName } from "../astro/constants";
 import type { PlanetSlot } from "../astro/types";
 import { SOUTH_INDIAN_GRID_POSITIONS } from "../astro/southIndianGrid";
 import { computeAarudomRasi } from "../astro/aarudom";
+import { computeUdayam } from "../astro/udayam";
+import type { UdayamCalc } from "../astro/udayam";
 import { RasiCell } from "../components/RasiCell";
 import { useI18n } from "../i18n/LanguageContext";
 
@@ -50,7 +52,7 @@ function fmtTime(d: Date, zoneName: string): string {
 }
 
 export function JamakolPage() {
-  const { t, planetName } = useI18n();
+  const { t, planetName, rasiFullName } = useI18n();
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [cityName, setCityName] = useState(DEFAULT_CITY);
@@ -61,6 +63,7 @@ export function JamakolPage() {
   const [chart, setChart] = useState<ChartResult | null>(null);
   const [placement, setPlacement] = useState<Record<number, PlanetSlot[]>>({});
   const [aarudomRasi, setAarudomRasi] = useState<number | null>(null);
+  const [udayam, setUdayam] = useState<UdayamCalc | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const usingCustom = cityName === CUSTOM_OPTION;
@@ -96,7 +99,9 @@ export function JamakolPage() {
   ) {
     try {
       setError(null);
-      setResult(computeJamakol(referenceInstant, latitude, longitude));
+      const jamakolResult = computeJamakol(referenceInstant, latitude, longitude);
+      setResult(jamakolResult);
+      setUdayam(computeUdayam(referenceInstant, jamakolResult.sunrise, jamakolResult.sunset));
       const newChart = computeChart({
         name: "Jamakol",
         date: dateStr,
@@ -208,6 +213,7 @@ export function JamakolPage() {
                     rasiIndex={rasi}
                     isAscendant={rasi === chart.ascendantRasi}
                     isAarudom={rasi === aarudomRasi}
+                    isUdayam={rasi === udayam?.rasiIndex}
                     planets={placement[rasi] ?? []}
                     style={{ gridRow: row, gridColumn: col }}
                   />
@@ -284,6 +290,16 @@ export function JamakolPage() {
               <p>{t("sunriseLabel")}: {fmtTime(result.sunrise, result.zoneName)}</p>
               <p>{t("sunsetLabel")}: {fmtTime(result.sunset, result.zoneName)}</p>
               <p>{t("nextSunriseLabel")}: {fmtTime(result.nextSunrise, result.zoneName)}</p>
+            </div>
+          )}
+
+          {udayam && (
+            <div className="summary">
+              <h3>{t("udayamDebugTitle")}</h3>
+              <p>{t("udayamS")}: {udayam.S.toFixed(2)}</p>
+              <p>{t("udayamD")}: {udayam.D.toFixed(4)}</p>
+              <p>{t("udayamDegrees")}: {udayam.degreesForward.toFixed(2)}°</p>
+              <p>{t("udayamSquare")}: {rasiFullName(udayam.rasiIndex)}</p>
             </div>
           )}
         </div>

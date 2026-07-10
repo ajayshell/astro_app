@@ -10,6 +10,7 @@ interface Props {
   showHouseNumber?: boolean;
   isAscendant: boolean;
   isAarudom?: boolean;
+  isUdayam?: boolean;
   planets: { planet: PlanetName; isRetrograde: boolean; siderealLongitude: number }[];
   className?: string;
   style?: React.CSSProperties;
@@ -21,6 +22,7 @@ export function RasiCell({
   showHouseNumber = false,
   isAscendant,
   isAarudom = false,
+  isUdayam = false,
   planets,
   className,
   style,
@@ -39,6 +41,7 @@ export function RasiCell({
         {showHouseNumber && houseNumber !== null && <span className="rasi-house-number">H{houseNumber}</span>}
         {isAscendant && <span className="rasi-asc-marker">{ascendantMarker()}</span>}
         {isAarudom && <span className="rasi-aarudom-marker">{t("aarudom")}</span>}
+        {isUdayam && <span className="rasi-udayam-marker">{t("udayam")}</span>}
       </div>
       <div className="rasi-cell-planets">
         {planets.map((p) => (
