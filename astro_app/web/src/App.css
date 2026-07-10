@@ -17,6 +17,12 @@ body {
   padding: 1rem 1.25rem 3rem;
 }
 
+@media (max-width: 480px) {
+  .app-shell {
+    padding: 0.75rem 0.75rem 2rem;
+  }
+}
+
 .top-bar {
   display: flex;
   justify-content: flex-end;
@@ -46,12 +52,13 @@ body {
   background: none;
   border: none;
   border-bottom: 3px solid transparent;
-  padding: 0.5rem 1.1rem;
+  padding: 0.7rem 1.1rem;
   font-size: 1rem;
   font-weight: 600;
   color: inherit;
   opacity: 0.6;
   cursor: pointer;
+  min-height: 44px;
 }
 
 .tab-bar button.tab-active {
@@ -94,6 +101,10 @@ header h1 {
   justify-content: center;
 }
 
+.charts-row > * {
+  min-width: 0;
+}
+
 .below-row {
   display: flex;
   gap: 1.5rem;
@@ -134,14 +145,48 @@ header h1 {
   font-weight: 600;
 }
 
+/* iOS Safari zooms the page in on focus if a form control's font-size is
+   under 16px; pin it explicitly rather than let it inherit the (smaller,
+   on phones) page root size. */
+.birth-form input, .birth-form select,
+.controls select,
+.custom-coords input {
+  font-size: 16px;
+  font-weight: normal;
+}
+
 .custom-coords {
   display: flex;
   gap: 0.5rem;
 }
 
+.custom-coords label {
+  min-width: 0;
+  flex: 1 1 0;
+}
+
 .form-error {
   color: #d33;
   font-size: 0.95rem;
+}
+
+.birth-form button {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  cursor: pointer;
+  min-height: 44px;
+  margin: 0.25rem 0.5rem 0 0;
+}
+
+.birth-form button[type="submit"] {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 700;
 }
 
 .pending-note {
@@ -181,6 +226,7 @@ header h1 {
   grid-template-rows: repeat(4, 1fr);
   gap: 2px;
   aspect-ratio: 1 / 1;
+  width: 100%;
   max-width: 800px;
   border: 2px solid currentColor;
 }
@@ -210,13 +256,24 @@ header h1 {
   display: flex;
   flex-direction: column;
   font-size: 0.85rem;
+  /* Charts are sized so this normally never triggers, but a cell with several
+     conjunct planets can still run out of room (more easily on a narrow phone
+     screen) -- scroll inside the cell rather than let content spill out over
+     neighboring cells or the page. */
+  overflow: auto;
 }
 
-/* The 3-up overview grid is too narrow to always fit 2-3 conjunct planets at
-   full size (the solo Explore chart is sized so this never triggers there).
-   Scroll inside the cell rather than let content spill out over the page. */
-.chart-panel-grid .chart-panel .rasi-cell {
-  overflow: auto;
+/* Shrink chart text further on narrow phones, so the internal-scroll fallback
+   above is only needed for genuinely crowded cells (3+ conjunct planets). */
+@media (max-width: 480px) {
+  .rasi-cell {
+    font-size: 0.72rem;
+    padding: 0.2rem;
+  }
+
+  .planet-chip {
+    font-size: 0.68rem;
+  }
 }
 
 .rasi-cell-over {
@@ -337,6 +394,7 @@ header h1 {
 /* North Indian diamond */
 .north-indian-wrap {
   position: relative;
+  width: 100%;
   max-width: 800px;
 }
 
@@ -380,6 +438,16 @@ header h1 {
   flex: 1 1 380px;
   min-width: 380px;
   max-width: 480px;
+}
+
+/* A 380px-per-panel minimum doesn't fit any phone in portrait -- stack the
+   D1/D9/Transit panels full-width instead of trying to keep them side by side. */
+@media (max-width: 520px) {
+  .chart-panel-grid .chart-panel {
+    flex: 1 1 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
 }
 
 .chart-panel h4 {
@@ -458,6 +526,15 @@ header h1 {
   margin-right: 0.5em;
 }
 
+/* Consistent stacked layout instead of unpredictable inline wrapping once
+   the "DASHA"/"BHUKTI"/"ANTHARAM" tag + lord name no longer both fit on one line. */
+@media (max-width: 420px) {
+  .dasha-level-tag {
+    display: block;
+    margin: 0 0 0.15rem;
+  }
+}
+
 .placeholder {
   opacity: 0.6;
 }
@@ -494,6 +571,31 @@ header h1 {
 
 .jamakol-grid .planet-chip {
   font-size: 0.68rem;
+}
+
+/* The 6x6 Jamakol ring leaves each inner rasi-cell far smaller than the
+   main chart's cells, so a phone-width grid can't fit the same
+   name+degree+tags stack per planet without the cell scrolling internally.
+   Degrees/dignity are already shown in full on the Overview chart, so drop
+   them here and keep just the planet name (with its retrograde marker). */
+@media (max-width: 480px) {
+  .jamakol-grid .rasi-cell {
+    font-size: 0.6rem;
+    padding: 0.12rem;
+  }
+
+  .jamakol-grid .rasi-cell-header {
+    line-height: 1.1;
+  }
+
+  .jamakol-grid .planet-chip {
+    font-size: 0.6rem;
+  }
+
+  .jamakol-grid .planet-chip-degree,
+  .jamakol-grid .planet-chip-tags {
+    display: none;
+  }
 }
 
 .jamakol-center {
