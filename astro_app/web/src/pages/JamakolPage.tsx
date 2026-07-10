@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
 import { DateTime } from "luxon";
 import tzlookup from "tz-lookup";
+import { DndContext } from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
 import { CITIES } from "../data/cities";
 import { resolveTimezone } from "../astro/timezone";
 import { localWallClockToUtc } from "../astro/util";
 import { computeJamakol } from "../astro/jamakol";
 import type { JamakolGraha, JamakolResult } from "../astro/jamakol";
+import { computeChart, buildPlacementMap } from "../astro/charts";
+import type { ChartResult } from "../astro/types";
+import type { PlanetName } from "../astro/constants";
+import type { PlanetSlot } from "../astro/types";
+import { SOUTH_INDIAN_GRID_POSITIONS } from "../astro/southIndianGrid";
+import { RasiCell } from "../components/RasiCell";
 import { useI18n } from "../i18n/LanguageContext";
 
 const CUSTOM_OPTION = "__custom__";
@@ -15,10 +23,7 @@ const DEFAULT_CITY = "Bengaluru";
 // sit at the 4 corners + 4 edge positions (NOT edge midpoints -- traced from
 // a reference screenshot, the edge boxes are offset in a rotationally
 // symmetric pattern: top at col3, bottom at col4, right at row3, left at
-// row4). The inner 4x4 (rows 2-5, cols 2-5) is a separate area, structured
-// like a South Indian chart (12 perimeter cells + a 2x2 center for
-// date/time), currently blank pending rules for what goes in those cells.
-// ringPosition is index-aligned to jamakol.ts's RING_ORDER.
+// row4). ringPosition is index-aligned to jamakol.ts's RING_ORDER.
 const RING_POSITIONS: { row: number; col: number }[] = [
   { row: 1, col: 1 }, // 0: top-left corner
   { row: 4, col: 1 }, // 1: left edge
@@ -30,14 +35,14 @@ const RING_POSITIONS: { row: number; col: number }[] = [
   { row: 1, col: 3 }, // 7: top edge
 ];
 
-// The 12 inner cells (South-Indian-chart-style perimeter of the 4x4 inner
-// block) with no confirmed content yet -- rendered blank as placeholders.
-const INNER_BLANK_CELLS: { row: number; col: number }[] = [
-  { row: 2, col: 2 }, { row: 2, col: 3 }, { row: 2, col: 4 }, { row: 2, col: 5 },
-  { row: 3, col: 2 }, { row: 3, col: 5 },
-  { row: 4, col: 2 }, { row: 4, col: 5 },
-  { row: 5, col: 2 }, { row: 5, col: 3 }, { row: 5, col: 4 }, { row: 5, col: 5 },
-];
+// The inner 4x4 (rows 2-5, cols 2-5) is a South-Indian Rasi chart (D1) for
+// the same date/time/place, shifted one row/column in from the SouthIndianChart
+// component's own 4x4 layout to sit inside the larger surrounding ring grid.
+const INNER_GRID_POSITIONS = SOUTH_INDIAN_GRID_POSITIONS.map(({ rasi, row, col }) => ({
+  rasi,
+  row: row + 1,
+  col: col + 1,
+}));
 
 function fmtTime(d: Date, zoneName: string): string {
   return DateTime.fromJSDate(d).setZone(zoneName).toFormat("h:mm a");
@@ -52,6 +57,8 @@ export function JamakolPage() {
   const [customLon, setCustomLon] = useState("77.5946");
   const [placeLabel, setPlaceLabel] = useState(DEFAULT_CITY);
   const [result, setResult] = useState<JamakolResult | null>(null);
+  const [chart, setChart] = useState<ChartResult | null>(null);
+  const [placement, setPlacement] = useState<Record<number, PlanetSlot[]>>({});
   const [error, setError] = useState<string | null>(null);
 
   const usingCustom = cityName === CUSTOM_OPTION;
@@ -76,10 +83,29 @@ export function JamakolPage() {
     return { latitude, longitude, placeName: usingCustom ? `${latitude}, ${longitude}` : cityName };
   }
 
-  function generate(referenceInstant: Date, latitude: number, longitude: number, placeName: string) {
+  function generate(
+    referenceInstant: Date,
+    dateStr: string,
+    timeStr: string,
+    latitude: number,
+    longitude: number,
+    timezoneOffsetHours: number,
+    placeName: string,
+  ) {
     try {
       setError(null);
       setResult(computeJamakol(referenceInstant, latitude, longitude));
+      const newChart = computeChart({
+        name: "Jamakol",
+        date: dateStr,
+        time: timeStr,
+        latitude,
+        longitude,
+        timezoneOffsetHours,
+        placeName,
+      });
+      setChart(newChart);
+      setPlacement(buildPlacementMap(newChart, "D1"));
       setPlaceLabel(placeName);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("tzError"));
@@ -92,7 +118,15 @@ export function JamakolPage() {
     if (!location) return;
     try {
       const { offsetHours } = resolveTimezone(location.latitude, location.longitude, date, time);
-      generate(localWallClockToUtc(date, time, offsetHours), location.latitude, location.longitude, location.placeName);
+      generate(
+        localWallClockToUtc(date, time, offsetHours),
+        date,
+        time,
+        location.latitude,
+        location.longitude,
+        offsetHours,
+        location.placeName,
+      );
     } catch {
       setError(t("tzError"));
     }
@@ -105,9 +139,11 @@ export function JamakolPage() {
     try {
       const zoneName = tzlookup(location.latitude, location.longitude);
       const local = DateTime.fromJSDate(now).setZone(zoneName);
-      setDate(local.toFormat("yyyy-MM-dd"));
-      setTime(local.toFormat("HH:mm"));
-      generate(now, location.latitude, location.longitude, location.placeName);
+      const dateStr = local.toFormat("yyyy-MM-dd");
+      const timeStr = local.toFormat("HH:mm");
+      setDate(dateStr);
+      setTime(timeStr);
+      generate(now, dateStr, timeStr, location.latitude, location.longitude, local.offset / 60, location.placeName);
     } catch {
       setError(t("tzError"));
     }
@@ -118,6 +154,31 @@ export function JamakolPage() {
     handleUseNow();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over) return;
+    const planet = active.id as PlanetName;
+    const targetRasi = Number(String(over.id).replace("rasi-", ""));
+
+    setPlacement((prev) => {
+      let movedEntry: PlanetSlot | undefined;
+      const cleared: Record<number, PlanetSlot[]> = {};
+      for (const [rasiKey, slots] of Object.entries(prev)) {
+        const rasi = Number(rasiKey);
+        cleared[rasi] = slots.filter((s) => {
+          if (s.planet === planet) {
+            movedEntry = s;
+            return false;
+          }
+          return true;
+        });
+      }
+      if (!movedEntry) return prev;
+      cleared[targetRasi] = [...(cleared[targetRasi] ?? []), movedEntry];
+      return cleared;
+    });
+  }
 
   return (
     <>
@@ -130,31 +191,39 @@ export function JamakolPage() {
         <p className="jamakol-warning">{t("jamakolWarning")}</p>
 
         <section className="charts-row">
-          {result && (
-            <div className="jamakol-grid">
-              <div className="jamakol-center" style={{ gridRow: "3 / span 2", gridColumn: "3 / span 2" }}>
-                <span>{date.split("-").reverse().join("-")}</span>
-                <span>{time}</span>
-                <span>{placeLabel}</span>
+          {result && chart && (
+            <DndContext onDragEnd={handleDragEnd}>
+              <div className="jamakol-grid">
+                <div className="jamakol-center" style={{ gridRow: "3 / span 2", gridColumn: "3 / span 2" }}>
+                  <span>{date.split("-").reverse().join("-")}</span>
+                  <span>{time}</span>
+                  <span>{placeLabel}</span>
+                </div>
+                {INNER_GRID_POSITIONS.map(({ rasi, row, col }) => (
+                  <RasiCell
+                    key={rasi}
+                    rasiIndex={rasi}
+                    isAscendant={rasi === chart.ascendantRasi}
+                    planets={placement[rasi] ?? []}
+                    style={{ gridRow: row, gridColumn: col }}
+                  />
+                ))}
+                {result.periods.map((p) => {
+                  const pos = RING_POSITIONS[p.ringPosition];
+                  const isCurrent = result.periods.indexOf(p) === result.currentIndex;
+                  return (
+                    <div
+                      key={p.ringPosition}
+                      className={`jamakol-cell ${isCurrent ? "jamakol-cell-current" : ""}`}
+                      style={{ gridRow: pos.row, gridColumn: pos.col }}
+                    >
+                      <span className="jamakol-cell-graha">{grahaName(p.graha)}</span>
+                      <span className="jamakol-cell-degree">{p.degree}°</span>
+                    </div>
+                  );
+                })}
               </div>
-              {INNER_BLANK_CELLS.map((pos, i) => (
-                <div key={i} className="jamakol-inner-cell" style={{ gridRow: pos.row, gridColumn: pos.col }} />
-              ))}
-              {result.periods.map((p) => {
-                const pos = RING_POSITIONS[p.ringPosition];
-                const isCurrent = result.periods.indexOf(p) === result.currentIndex;
-                return (
-                  <div
-                    key={p.ringPosition}
-                    className={`jamakol-cell ${isCurrent ? "jamakol-cell-current" : ""}`}
-                    style={{ gridRow: pos.row, gridColumn: pos.col }}
-                  >
-                    <span className="jamakol-cell-graha">{grahaName(p.graha)}</span>
-                    <span className="jamakol-cell-degree">{p.degree}°</span>
-                  </div>
-                );
-              })}
-            </div>
+            </DndContext>
           )}
         </section>
 
