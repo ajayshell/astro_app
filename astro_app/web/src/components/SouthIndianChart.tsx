@@ -1,11 +1,13 @@
 import type { PlanetName } from "../astro/constants";
 import type { CenterInfo } from "../astro/format";
+import { houseOfRasi } from "../astro/charts";
 import { RasiCell } from "./RasiCell";
 
 interface Props {
   ascendantRasi: number;
   placement: Record<number, { planet: PlanetName; isRetrograde: boolean }[]>;
   centerInfo?: CenterInfo;
+  showHouseNumber?: boolean;
 }
 
 // Fixed South Indian layout: signs occupy fixed cells in a 4x4 grid, going
@@ -26,7 +28,7 @@ const GRID_POSITIONS: { rasi: number; row: number; col: number }[] = [
   { rasi: 5, row: 4, col: 4 }, // Virgo
 ];
 
-export function SouthIndianChart({ ascendantRasi, placement, centerInfo }: Props) {
+export function SouthIndianChart({ ascendantRasi, placement, centerInfo, showHouseNumber }: Props) {
   return (
     <div className="south-indian-grid">
       {centerInfo && (
@@ -40,6 +42,8 @@ export function SouthIndianChart({ ascendantRasi, placement, centerInfo }: Props
         <RasiCell
           key={rasi}
           rasiIndex={rasi}
+          houseNumber={houseOfRasi(rasi, ascendantRasi)}
+          showHouseNumber={showHouseNumber}
           isAscendant={rasi === ascendantRasi}
           planets={placement[rasi] ?? []}
           style={{ gridRow: row, gridColumn: col }}

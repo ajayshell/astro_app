@@ -5,11 +5,24 @@ import { CITIES } from "../data/cities";
 import { resolveTimezone } from "../astro/timezone";
 import { localWallClockToUtc } from "../astro/util";
 import { computeJamakol } from "../astro/jamakol";
-import type { JamakolResult } from "../astro/jamakol";
+import type { JamakolGraha, JamakolResult } from "../astro/jamakol";
 import { useI18n } from "../i18n/LanguageContext";
 
 const CUSTOM_OPTION = "__custom__";
 const DEFAULT_CITY = "Bengaluru";
+
+// Anti-clockwise from top-left, in a 3x3 grid with the center reserved for
+// the date/time/place caption -- ringPosition is index-aligned to jamakol.ts's RING_ORDER.
+const RING_POSITIONS: { row: number; col: number }[] = [
+  { row: 1, col: 1 }, // 0: top-left
+  { row: 2, col: 1 }, // 1: mid-left
+  { row: 3, col: 1 }, // 2: bottom-left
+  { row: 3, col: 2 }, // 3: bottom-mid
+  { row: 3, col: 3 }, // 4: bottom-right
+  { row: 2, col: 3 }, // 5: mid-right
+  { row: 1, col: 3 }, // 6: top-right
+  { row: 1, col: 2 }, // 7: top-mid
+];
 
 function fmtTime(d: Date, zoneName: string): string {
   return DateTime.fromJSDate(d).setZone(zoneName).toFormat("h:mm a");
@@ -22,10 +35,15 @@ export function JamakolPage() {
   const [cityName, setCityName] = useState(DEFAULT_CITY);
   const [customLat, setCustomLat] = useState("12.9716");
   const [customLon, setCustomLon] = useState("77.5946");
+  const [placeLabel, setPlaceLabel] = useState(DEFAULT_CITY);
   const [result, setResult] = useState<JamakolResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const usingCustom = cityName === CUSTOM_OPTION;
+
+  function grahaName(g: JamakolGraha): string {
+    return g === "Maandi" ? t("maandi") : planetName(g);
+  }
 
   function resolveLocation(): { latitude: number; longitude: number; placeName: string } | null {
     const city = CITIES.find((c) => c.name === cityName);
@@ -43,10 +61,11 @@ export function JamakolPage() {
     return { latitude, longitude, placeName: usingCustom ? `${latitude}, ${longitude}` : cityName };
   }
 
-  function generate(referenceInstant: Date, latitude: number, longitude: number) {
+  function generate(referenceInstant: Date, latitude: number, longitude: number, placeName: string) {
     try {
       setError(null);
       setResult(computeJamakol(referenceInstant, latitude, longitude));
+      setPlaceLabel(placeName);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("tzError"));
     }
@@ -58,7 +77,7 @@ export function JamakolPage() {
     if (!location) return;
     try {
       const { offsetHours } = resolveTimezone(location.latitude, location.longitude, date, time);
-      generate(localWallClockToUtc(date, time, offsetHours), location.latitude, location.longitude);
+      generate(localWallClockToUtc(date, time, offsetHours), location.latitude, location.longitude, location.placeName);
     } catch {
       setError(t("tzError"));
     }
@@ -73,7 +92,7 @@ export function JamakolPage() {
       const local = DateTime.fromJSDate(now).setZone(zoneName);
       setDate(local.toFormat("yyyy-MM-dd"));
       setTime(local.toFormat("HH:mm"));
-      generate(now, location.latitude, location.longitude);
+      generate(now, location.latitude, location.longitude, location.placeName);
     } catch {
       setError(t("tzError"));
     }
@@ -94,6 +113,32 @@ export function JamakolPage() {
 
       <div className="app-body">
         <p className="jamakol-warning">{t("jamakolWarning")}</p>
+
+        <section className="charts-row">
+          {result && (
+            <div className="jamakol-grid">
+              <div className="jamakol-center">
+                <span>{date.split("-").reverse().join("-")}</span>
+                <span>{time}</span>
+                <span>{placeLabel}</span>
+              </div>
+              {result.periods.map((p) => {
+                const pos = RING_POSITIONS[p.ringPosition];
+                const isCurrent = result.periods.indexOf(p) === result.currentIndex;
+                return (
+                  <div
+                    key={p.ringPosition}
+                    className={`jamakol-cell ${isCurrent ? "jamakol-cell-current" : ""}`}
+                    style={{ gridRow: pos.row, gridColumn: pos.col }}
+                  >
+                    <span className="jamakol-cell-graha">{grahaName(p.graha)}</span>
+                    <span className="jamakol-cell-degree">{p.degree}°</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
         <div className="below-row">
           <form className="birth-form" onSubmit={handleGenerate}>
@@ -145,40 +190,12 @@ export function JamakolPage() {
           {result && (
             <div className="summary">
               <h3>{t("computedValues")}</h3>
-              <p>{t("weekdayLordLabel")}: {planetName(result.weekdayLord)}</p>
               <p>{t("sunriseLabel")}: {fmtTime(result.sunrise, result.zoneName)}</p>
               <p>{t("sunsetLabel")}: {fmtTime(result.sunset, result.zoneName)}</p>
               <p>{t("nextSunriseLabel")}: {fmtTime(result.nextSunrise, result.zoneName)}</p>
             </div>
           )}
         </div>
-
-        {result && (
-          <section className="jamakol-section">
-            <table className="jamakol-table">
-              <thead>
-                <tr>
-                  <th>{t("jamam")}</th>
-                  <th></th>
-                  <th>{t("graha")}</th>
-                  <th>{t("start")}</th>
-                  <th>{t("end")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {result.periods.map((p, i) => (
-                  <tr key={p.index} className={i === result.currentIndex ? "jamakol-row-current" : ""}>
-                    <td>{p.index}</td>
-                    <td>{p.isDay ? t("dayLabel") : t("nightLabel")}</td>
-                    <td>{planetName(p.lord)}</td>
-                    <td>{fmtTime(p.start, result.zoneName)}</td>
-                    <td>{fmtTime(p.end, result.zoneName)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
       </div>
     </>
   );

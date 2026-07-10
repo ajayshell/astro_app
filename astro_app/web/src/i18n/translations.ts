@@ -89,6 +89,8 @@ export const UI_TEXT: Dict = {
   sunsetLabel: { en: "Sunset", ta: "சூரிய அஸ்தமனம்" },
   nextSunriseLabel: { en: "Next sunrise", ta: "அடுத்த சூரிய உதயம்" },
   weekdayLordLabel: { en: "Weekday lord", ta: "வார அதிபதி" },
+  showHouseNumbers: { en: "Show house numbers", ta: "வீட்டு எண்களைக் காட்டு" },
+  maandi: { en: "Maandi", ta: "மாந்தி" },
 };
 
 export const ASCENDANT_MARKER: { en: string; ta: string } = { en: "As", ta: "La" };

@@ -22,6 +22,7 @@ export function HoroscopePage() {
   const [chartStyle, setChartStyle] = useState<ChartStyle>("south");
   const [vargaKind, setVargaKind] = useState<VargaKind>("D1");
   const [view, setView] = useState<ViewMode>("overview");
+  const [showHouseNumber, setShowHouseNumber] = useState(true);
 
   const transitChart = useMemo(() => {
     if (!birthInput) return null;
@@ -51,6 +52,17 @@ export function HoroscopePage() {
       </header>
 
       <div className="app-body">
+        {chart && (
+          <label className="house-number-toggle">
+            <input
+              type="checkbox"
+              checked={showHouseNumber}
+              onChange={(e) => setShowHouseNumber(e.target.checked)}
+            />
+            {t("showHouseNumbers")}
+          </label>
+        )}
+
         <section className="charts-row">
           {chart ? (
             view === "overview" ? (
@@ -61,6 +73,7 @@ export function HoroscopePage() {
                   vargaKind="D1"
                   chartStyle={chartStyle}
                   centerInfo={centerInfo}
+                  showHouseNumber={showHouseNumber}
                 />
                 <ChartPanel
                   title={t("navamsaD9")}
@@ -68,6 +81,7 @@ export function HoroscopePage() {
                   vargaKind="D9"
                   chartStyle={chartStyle}
                   centerInfo={centerInfo}
+                  showHouseNumber={showHouseNumber}
                 />
                 {transitChart && (
                   <ChartPanel
@@ -76,6 +90,7 @@ export function HoroscopePage() {
                     vargaKind="D1"
                     chartStyle={chartStyle}
                     centerInfo={centerInfo}
+                    showHouseNumber={showHouseNumber}
                   />
                 )}
               </div>
@@ -86,6 +101,7 @@ export function HoroscopePage() {
                 vargaKind={vargaKind}
                 chartStyle={chartStyle}
                 centerInfo={centerInfo}
+                showHouseNumber={showHouseNumber}
               />
             )
           ) : (

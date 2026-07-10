@@ -18,10 +18,11 @@ interface Props {
   vargaKind: VargaKind;
   chartStyle: ChartStyle;
   centerInfo?: CenterInfo;
+  showHouseNumber?: boolean;
 }
 
 /** A single interactive chart (D1/D9/transit/etc.), with its own drag-and-drop state. */
-export function ChartPanel({ title, chart, vargaKind, chartStyle, centerInfo }: Props) {
+export function ChartPanel({ title, chart, vargaKind, chartStyle, centerInfo, showHouseNumber }: Props) {
   const [placement, setPlacement] = useState<Record<number, PlanetSlot[]>>({});
 
   useEffect(() => {
@@ -61,9 +62,14 @@ export function ChartPanel({ title, chart, vargaKind, chartStyle, centerInfo }: 
       <h4>{title}</h4>
       <DndContext onDragEnd={handleDragEnd}>
         {chartStyle === "south" ? (
-          <SouthIndianChart ascendantRasi={ascendantRasi} placement={placement} centerInfo={centerInfo} />
+          <SouthIndianChart
+            ascendantRasi={ascendantRasi}
+            placement={placement}
+            centerInfo={centerInfo}
+            showHouseNumber={showHouseNumber}
+          />
         ) : (
-          <NorthIndianChart ascendantRasi={ascendantRasi} placement={placement} />
+          <NorthIndianChart ascendantRasi={ascendantRasi} placement={placement} showHouseNumber={showHouseNumber} />
         )}
       </DndContext>
     </div>

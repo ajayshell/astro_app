@@ -3,41 +3,49 @@ import { DateTime } from "luxon";
 import tzlookup from "tz-lookup";
 import type { PlanetName } from "./constants";
 
+export type JamakolGraha = PlanetName | "Maandi";
+
 /**
- * Jamakol (ஜாமக்கோளம்): the traditional division of a day (sunrise to next
- * sunrise) into 8 "jamams" -- 4 across daytime, 4 across the night -- each
- * ruled by a graha, used to judge whether the current moment is favorable.
+ * Jamakol (ஜாமக்கோளம்): the day (sunrise to next sunrise) divided into 8
+ * "jamams" -- 4 across daytime, 4 across the night -- each ruled by a graha,
+ * traditionally drawn as a ring of 8 boxes around a square, read
+ * anti-clockwise starting from the top-left box.
  *
- * IMPLEMENTATION IS A BEST-EFFORT GUESS, NOT A CONFIRMED RULE. It borrows the
- * mechanics of the (Western) planetary-hours system, which several Tamil
- * references describe Jamakol as being structurally equivalent to:
- *   - jamam 1 (right after sunrise) is ruled by that weekday's lord
- *     (Sun/Moon/Mars/Mercury/Jupiter/Venus/Saturn for Sun..Sat)
- *   - subsequent jamams (day and night together, continuously) cycle through
- *     the Chaldean order: Saturn, Jupiter, Mars, Sun, Venus, Mercury, Moon.
- * This has NOT been confirmed against the astrologer's actual system. If
- * Jamakol instead uses a fixed (non-rotating) lord-per-jamam-number table, or
- * treats day/night as separate 4-cycles, this needs to be rewritten -- flag
- * it before relying on this for real timing decisions.
+ * CONFIRMED (from a reference chart + explicit rule from the user):
+ *   - anti-clockwise ring order: Surya (Sun), Chevva (Mars), Guru (Jupiter),
+ *     Budhan (Mercury), Shukran (Venus), Shani (Saturn), Chandran (Moon),
+ *     Maandi (an upagraha, not a real planet -- the 8th slot).
+ *   - on a Sunday, Surya sits in the top-left box (= the jamam right after
+ *     sunrise).
+ *
+ * NOT YET CONFIRMED -- flag before relying on this:
+ *   - How the starting box rotates for the other six weekdays. A reference
+ *     chart for a Thursday showed Maandi (not Surya) in the top-left box,
+ *     which rules out the obvious "shift by weekday index" rule -- no linear
+ *     rule fits both the Sunday and Thursday data points. Until the real rule
+ *     is known, this always starts at Surya regardless of weekday.
+ *   - Maandi is placed as a label only; its own classical calculation (a
+ *     time-of-day-dependent upagraha position) is not implemented.
+ *   - The meaning of the "degree" shown per box (this build uses 0/45/90/.../
+ *     315, one per jamam) has not been confirmed against source material.
  */
 
-const WEEKDAY_LORDS: PlanetName[] = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
-const CHALDEAN_ORDER: PlanetName[] = ["Saturn", "Jupiter", "Mars", "Sun", "Venus", "Mercury", "Moon"];
+const RING_ORDER: JamakolGraha[] = ["Sun", "Mars", "Jupiter", "Mercury", "Venus", "Saturn", "Moon", "Maandi"];
 
 export interface JamakolPeriod {
-  index: number; // 1-8
+  ringPosition: number; // 0-7, anti-clockwise from top-left
+  degree: number; // 0, 45, 90 ... 315 (unconfirmed meaning, see file header)
   isDay: boolean;
-  lord: PlanetName;
+  graha: JamakolGraha;
   start: Date;
   end: Date;
 }
 
 export interface JamakolResult {
-  weekdayLord: PlanetName;
   sunrise: Date;
   sunset: Date;
   nextSunrise: Date;
-  periods: JamakolPeriod[];
+  periods: JamakolPeriod[]; // index-aligned with ringPosition (periods[i].ringPosition === i)
   currentIndex: number | null; // index into `periods` containing the reference instant, if any
   zoneName: string; // IANA zone of the location -- all times above must be displayed in this zone, not the viewer's local one
 }
@@ -66,42 +74,32 @@ export function computeJamakol(referenceInstant: Date, latitude: number, longitu
   const sunrise = sunriseTime.date;
   const sunset = sunsetTime.date;
   const nextSunrise = nextSunriseTime.date;
-
   const zoneName = tzlookup(latitude, longitude);
-  const localWeekday = DateTime.fromJSDate(sunrise).setZone(zoneName).weekday; // 1=Mon..7=Sun
-  const dayIndex = localWeekday % 7; // 0=Sun..6=Sat, matching WEEKDAY_LORDS
-  const weekdayLord = WEEKDAY_LORDS[dayIndex];
-  const chaldeanStart = CHALDEAN_ORDER.indexOf(weekdayLord);
+
+  // TODO: rotate the ring's starting position by weekday once that rule is
+  // confirmed (see file header) -- always starts at Surya for now.
+  const ringStart = 0;
 
   const periods: JamakolPeriod[] = [];
   const daySegments = splitIntoFour(sunrise, sunset);
   const nightSegments = splitIntoFour(sunset, nextSunrise);
 
   daySegments.forEach(([start, end], i) => {
-    periods.push({
-      index: i + 1,
-      isDay: true,
-      lord: CHALDEAN_ORDER[(chaldeanStart + i) % 7],
-      start,
-      end,
-    });
+    const ringPosition = (ringStart + i) % 8;
+    periods.push({ ringPosition, degree: ringPosition * 45, isDay: true, graha: RING_ORDER[ringPosition], start, end });
   });
   nightSegments.forEach(([start, end], i) => {
-    periods.push({
-      index: i + 5,
-      isDay: false,
-      lord: CHALDEAN_ORDER[(chaldeanStart + 4 + i) % 7],
-      start,
-      end,
-    });
+    const ringPosition = (ringStart + 4 + i) % 8;
+    periods.push({ ringPosition, degree: ringPosition * 45, isDay: false, graha: RING_ORDER[ringPosition], start, end });
   });
+
+  periods.sort((a, b) => a.ringPosition - b.ringPosition);
 
   const currentIndex = periods.findIndex(
     (p) => referenceInstant.getTime() >= p.start.getTime() && referenceInstant.getTime() < p.end.getTime(),
   );
 
   return {
-    weekdayLord,
     sunrise,
     sunset,
     nextSunrise,
