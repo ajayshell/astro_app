@@ -11,3 +11,12 @@ The result should be called Soorya Veedhi Count (SVC)
 
 
 Next, count from Udayam, clockwise for SVC number of squares and then write 'Kavippu' in that square.
+
+
+Rule for calculating the degrees for Aarudom in the chart:
+Pick up the minutes of the time of birth and multiply it by 6 = degree of the Aarudom. Call this Ad
+From Mesham, subtract 30 degrees from Ad for each square traversed, including Mesham. When writing Aarudom write the reminder next to it.
+
+Rule for calculating degrees for Kaippu.
+degrees for Kavippu = 30 - degrees of Aarudom.
+Calculate this and print it next to Kavippu (wherever Kavippu is present)

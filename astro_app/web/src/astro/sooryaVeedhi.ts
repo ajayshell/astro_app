@@ -19,6 +19,13 @@
  * Counting convention: inclusive -- the starting sign counts as 1, same as
  * the Aarudom rule (see aarudom.ts). Confirmed by the astrologer for both
  * counting steps here.
+ *
+ * Kavippu's degree (per the rule's later addition): 30 - Aarudom's degree.
+ * Since Aarudom's degree is always in [0, 30) (see aarudom.ts), this is
+ * always in (0, 30] -- the one boundary case, Aarudom at exactly 0 degrees,
+ * gives exactly 30, which formatDegree's own mod-30 wraps to display as
+ * 0 degrees (the same value, just expressed as 0 degrees into the sign
+ * rather than 30 degrees into the previous one).
  */
 
 const MESHA = 0;
@@ -47,11 +54,18 @@ export interface SooryaVeedhiCalc {
   targetRasi: number; // Mesha, Rishaba, or Mithuna, per Surya's group
   svc: number; // Soorya Veedhi Count
   kavippuRasi: number; // final marked square
+  kavippuDegree: number; // 30 - Aarudom's degree
 }
 
-export function computeSooryaVeedhi(suryaRasi: number, aarudomRasi: number, udayamRasi: number): SooryaVeedhiCalc {
+export function computeSooryaVeedhi(
+  suryaRasi: number,
+  aarudomRasi: number,
+  aarudomDegree: number,
+  udayamRasi: number,
+): SooryaVeedhiCalc {
   const targetRasi = targetRasiForSurya(suryaRasi);
   const svc = countClockwiseInclusive(aarudomRasi, targetRasi);
   const kavippuRasi = (udayamRasi + svc - 1) % 12;
-  return { suryaRasi, targetRasi, svc, kavippuRasi };
+  const kavippuDegree = 30 - aarudomDegree;
+  return { suryaRasi, targetRasi, svc, kavippuRasi, kavippuDegree };
 }

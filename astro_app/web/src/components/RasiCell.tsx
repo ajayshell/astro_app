@@ -11,13 +11,17 @@ interface Props {
   showHouseNumber?: boolean;
   isAscendant: boolean;
   isAarudom?: boolean;
+  // Degrees into rasiIndex's sign (0-30), per the Aarudom degree rule.
+  aarudomDegree?: number;
   isUdayam?: boolean;
-  // Udayam is the only one of the three markers with a defined degree (the
-  // Aarudom/Kavippu rules only ever resolve to a sign, not a fractional
-  // degree within it) -- so this is the sidereal longitude Udayam landed on,
-  // shown next to the marker when present.
+  // Sidereal longitude Udayam landed on -- formatted the same way as a
+  // planet's degree, since it's a full longitude rather than a within-sign
+  // value like aarudomDegree.
   udayamLongitude?: number;
   isKavippu?: boolean;
+  // Degrees into rasiIndex's sign (0-30], per the Kavippu degree rule
+  // (30 - Aarudom's degree).
+  kavippuDegree?: number;
   planets: { planet: PlanetName; isRetrograde: boolean; siderealLongitude: number }[];
   className?: string;
   style?: React.CSSProperties;
@@ -30,9 +34,11 @@ export function RasiCell({
   showHouseNumber = false,
   isAscendant,
   isAarudom = false,
+  aarudomDegree,
   isUdayam = false,
   udayamLongitude,
   isKavippu = false,
+  kavippuDegree,
   planets,
   className,
   style,
@@ -51,14 +57,24 @@ export function RasiCell({
         <span className="rasi-sign-label">{rasiLabel(rasiIndex)}</span>
         {showHouseNumber && houseNumber !== null && <span className="rasi-house-number">H{houseNumber}</span>}
         {isAscendant && <span className="rasi-asc-marker">{ascendantMarker()}</span>}
-        {isAarudom && <span className="rasi-aarudom-marker">{t("aarudom")}</span>}
+        {isAarudom && (
+          <span className="rasi-aarudom-marker">
+            {t("aarudom")}
+            {aarudomDegree !== undefined && <span className="rasi-aarudom-degree"> {formatDegree(aarudomDegree)}</span>}
+          </span>
+        )}
         {isUdayam && (
           <span className="rasi-udayam-marker">
             {t("udayam")}
             {udayamLongitude !== undefined && <span className="rasi-udayam-degree"> {formatDegree(udayamLongitude)}</span>}
           </span>
         )}
-        {isKavippu && <span className="rasi-kavippu-marker">{t("kavippu")}</span>}
+        {isKavippu && (
+          <span className="rasi-kavippu-marker">
+            {t("kavippu")}
+            {kavippuDegree !== undefined && <span className="rasi-kavippu-degree"> {formatDegree(kavippuDegree)}</span>}
+          </span>
+        )}
       </div>
       <div className="rasi-cell-planets">
         {planets.map((p) => (

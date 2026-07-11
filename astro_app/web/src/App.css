@@ -317,6 +317,12 @@ header h1 {
   font-weight: 700;
 }
 
+.rasi-aarudom-degree {
+  font-size: 0.85em;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
 .rasi-udayam-marker {
   color: #0d9488;
   font-weight: 700;
@@ -331,6 +337,12 @@ header h1 {
 .rasi-kavippu-marker {
   color: #dc2626;
   font-weight: 700;
+}
+
+.rasi-kavippu-degree {
+  font-size: 0.85em;
+  font-weight: 500;
+  opacity: 0.8;
 }
 
 .rasi-cell-planets {

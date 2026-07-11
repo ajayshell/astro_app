@@ -13,7 +13,8 @@ import type { ChartResult } from "../astro/types";
 import type { PlanetName } from "../astro/constants";
 import type { PlanetSlot } from "../astro/types";
 import { SOUTH_INDIAN_GRID_POSITIONS } from "../astro/southIndianGrid";
-import { computeAarudomRasi } from "../astro/aarudom";
+import { computeAarudom } from "../astro/aarudom";
+import type { AarudomCalc } from "../astro/aarudom";
 import { computeUdayam } from "../astro/udayam";
 import type { UdayamCalc } from "../astro/udayam";
 import { computeSooryaVeedhi } from "../astro/sooryaVeedhi";
@@ -64,7 +65,7 @@ export function JamakolPage() {
   const [result, setResult] = useState<JamakolResult | null>(null);
   const [chart, setChart] = useState<ChartResult | null>(null);
   const [placement, setPlacement] = useState<Record<number, PlanetSlot[]>>({});
-  const [aarudomRasi, setAarudomRasi] = useState<number | null>(null);
+  const [aarudom, setAarudom] = useState<AarudomCalc | null>(null);
   const [udayam, setUdayam] = useState<UdayamCalc | null>(null);
   const [sooryaVeedhi, setSooryaVeedhi] = useState<SooryaVeedhiCalc | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -115,12 +116,12 @@ export function JamakolPage() {
       });
       setChart(newChart);
       setPlacement(buildPlacementMap(newChart, "D1"));
-      const aarudom = computeAarudomRasi(Number(timeStr.split(":")[1]));
-      setAarudomRasi(aarudom);
+      const aarudomCalc = computeAarudom(Number(timeStr.split(":")[1]));
+      setAarudom(aarudomCalc);
       const sun = newChart.planets.find((p) => p.planet === "Sun")!;
       const udayamCalc = computeUdayam(referenceInstant, jamakolResult.sunrise, jamakolResult.sunset, sun.siderealLongitude);
       setUdayam(udayamCalc);
-      setSooryaVeedhi(computeSooryaVeedhi(sun.rasi, aarudom, udayamCalc.rasiIndex));
+      setSooryaVeedhi(computeSooryaVeedhi(sun.rasi, aarudomCalc.rasiIndex, aarudomCalc.degree, udayamCalc.rasiIndex));
       setPlaceLabel(placeName);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("tzError"));
@@ -219,10 +220,12 @@ export function JamakolPage() {
                     key={rasi}
                     rasiIndex={rasi}
                     isAscendant={rasi === chart.ascendantRasi}
-                    isAarudom={rasi === aarudomRasi}
+                    isAarudom={rasi === aarudom?.rasiIndex}
+                    aarudomDegree={rasi === aarudom?.rasiIndex ? aarudom?.degree : undefined}
                     isUdayam={rasi === udayam?.rasiIndex}
                     udayamLongitude={rasi === udayam?.rasiIndex ? udayam?.destinationLongitude : undefined}
                     isKavippu={rasi === sooryaVeedhi?.kavippuRasi}
+                    kavippuDegree={rasi === sooryaVeedhi?.kavippuRasi ? sooryaVeedhi?.kavippuDegree : undefined}
                     planets={placement[rasi] ?? []}
                     style={{ gridRow: row, gridColumn: col }}
                   />
