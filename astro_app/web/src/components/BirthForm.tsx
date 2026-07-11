@@ -14,8 +14,8 @@ const DEFAULT_CITY = "Bengaluru";
 export function BirthForm({ onSubmit }: Props) {
   const { t } = useI18n();
   const [name, setName] = useState("Aj");
-  const [date, setDate] = useState("1979-06-29");
-  const [time, setTime] = useState("08:21");
+  const [date, setDate] = useState("1974-04-16");
+  const [time, setTime] = useState("10:04");
   const [cityName, setCityName] = useState(DEFAULT_CITY);
   const [customLat, setCustomLat] = useState("12.9716");
   const [customLon, setCustomLon] = useState("77.5946");

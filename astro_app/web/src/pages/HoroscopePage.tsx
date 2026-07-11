@@ -47,7 +47,7 @@ export function HoroscopePage() {
   return (
     <>
       <header>
-        <h1>{birthInput?.name ?? "Aj"}{t("horoscopeTitleSuffix")}</h1>
+        <h1>{t("horoscopeTitle")}</h1>
         <p className="subtitle">{t("subtitle")}</p>
       </header>
 

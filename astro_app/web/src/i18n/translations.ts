@@ -58,7 +58,7 @@ export const UI_TEXT: Dict = {
     ta: "7-காரக முறை (சூரியன்-சனி, ராகு/கேது இல்லை) -- இது சரியான முறையா என ஜோதிடரிடம் உறுதி செய்யவும்.",
   },
   subtitle: { en: "South Indian Horoscope — for astrologer review", ta: "தென்னிந்திய ஜாதகம் — ஜோதிடர் ஆய்விற்காக" },
-  horoscopeTitleSuffix: { en: "’s Horoscope", ta: " ஜாதகம்" },
+  horoscopeTitle: { en: "Astro Raasi Horoscope", ta: "Astro Raasi ஜாதகம்" },
   latLonInvalid: { en: "Latitude/longitude must be valid numbers.", ta: "அட்ச/தீர்க்கரேகை சரியான எண்களாக இருக்க வேண்டும்." },
   latLonRange: {
     en: "Latitude must be -90..90 and longitude -180..180.",
