@@ -3,7 +3,7 @@
 Internal reference: how the app is structured, and a per-feature summary
 of every astrological rule this codebase implements, with its
 confirmed/unconfirmed status. Not linked from the running app (it exposes
-calculation detail that `docs/USER_GUIDE.md` deliberately omits).
+calculation detail that `web/docs/USER_GUIDE.md` deliberately omits).
 
 For the full chronological build history, worked examples, and edge-case
 discussion behind each rule below, see `PROJECT_BRIEF.md` — this doc is a
@@ -112,10 +112,12 @@ calendar date a year later resolves to UTC−7 (new rule, still DST).
 
 ### User guide rendering
 
-`docs/USER_GUIDE.md` is the single source of truth for the in-app "User
+`web/docs/USER_GUIDE.md` is the single source of truth for the in-app "User
 guide" page — no duplicated content. `pages/UserGuidePage.tsx` imports it
-via Vite's `?raw` import (works across the `astro_app/` → `web/` boundary
-with no config changes) and renders it client-side with `marked`. `App.tsx`
+via Vite's `?raw` import and renders it client-side with `marked`. Lives
+inside `web/` (moved from `astro_app/docs/`) so it deploys with the app --
+Vercel's build only uploads the `web/` project root, not sibling folders.
+`App.tsx`
 treats `"userGuide"` as a third `Page` value that hides the Horoscope/
 Jamakol tab bar while active.
 

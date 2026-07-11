@@ -1,8 +1,8 @@
 import { marked } from "marked";
-// Raw markdown source -- docs/USER_GUIDE.md is the single source of truth
+// Raw markdown source -- web/docs/USER_GUIDE.md is the single source of truth
 // for this page's content (also readable directly in the repo); this
 // import renders it in-app instead of duplicating the text here.
-import userGuideMarkdown from "../../../docs/USER_GUIDE.md?raw";
+import userGuideMarkdown from "../../docs/USER_GUIDE.md?raw";
 import { useI18n } from "../i18n/LanguageContext";
 
 interface Props {
