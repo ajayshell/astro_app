@@ -8,6 +8,7 @@ export const UI_TEXT: Dict = {
   birthDetails: { en: "Birth details", ta: "பிறப்பு விவரங்கள்" },
   name: { en: "Name", ta: "பெயர்" },
   dateOfBirth: { en: "Date of birth", ta: "பிறந்த தேதி" },
+  dayOfWeek: { en: "Day", ta: "கிழமை" },
   timeOfBirth: { en: "Time of birth", ta: "பிறந்த நேரம்" },
   placeOfBirth: { en: "Place of birth", ta: "பிறந்த இடம்" },
   customCoordinates: { en: "Custom coordinates...", ta: "விருப்ப அட்ச/தீர்க்கரேகை..." },
@@ -104,6 +105,11 @@ export const UI_TEXT: Dict = {
 };
 
 export const ASCENDANT_MARKER: { en: string; ta: string } = { en: "As", ta: "La" };
+
+// Index-aligned with WEEKDAY_NAMES in astro/constants.ts (0 = Sunday .. 6 = Saturday).
+export const WEEKDAY_NAMES_TA = [
+  "ஞாயிறு", "திங்கள்", "செவ்வாய்", "புதன்", "வியாழன்", "வெள்ளி", "சனி",
+];
 
 // Index-aligned with RASI_NAMES in astro/constants.ts (0 = Aries .. 11 = Pisces).
 export const RASI_NAMES_TA = [

@@ -54,8 +54,19 @@ function fmtTime(d: Date, zoneName: string): string {
   return DateTime.fromJSDate(d).setZone(zoneName).toFormat("h:mm a");
 }
 
+// Weekday index (0 = Sunday .. 6 = Saturday) for a "YYYY-MM-DD" date string,
+// or null if not yet filled in. Built from the parts directly (not
+// `new Date(dateStr)`) so the calendar date isn't shifted by a day in
+// timezones where that string would otherwise be parsed as UTC midnight.
+function weekdayIndexForDate(dateStr: string): number | null {
+  if (!dateStr) return null;
+  const [year, month, day] = dateStr.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day).getDay();
+}
+
 export function JamakolPage() {
-  const { t, planetName, rasiFullName } = useI18n();
+  const { t, planetName, rasiFullName, weekdayName } = useI18n();
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [cityName, setCityName] = useState(DEFAULT_CITY);
@@ -71,6 +82,7 @@ export function JamakolPage() {
   const [error, setError] = useState<string | null>(null);
 
   const usingCustom = cityName === CUSTOM_OPTION;
+  const weekdayIndex = weekdayIndexForDate(date);
 
   function grahaName(g: JamakolGraha): string {
     return g === "Maandi" ? t("maandi") : planetName(g);
@@ -256,6 +268,11 @@ export function JamakolPage() {
             <label>
               {t("dateOfBirth")}
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            </label>
+
+            <label>
+              {t("dayOfWeek")}
+              <input type="text" value={weekdayIndex !== null ? weekdayName(weekdayIndex) : ""} readOnly />
             </label>
 
             <label>

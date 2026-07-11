@@ -3,6 +3,11 @@ export const RASI_NAMES = [
   "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
 ] as const;
 
+// Index-aligned with JS Date.getDay() (0 = Sunday .. 6 = Saturday).
+export const WEEKDAY_NAMES = [
+  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+] as const;
+
 export const NAKSHATRA_NAMES = [
   "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra",
   "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni",
