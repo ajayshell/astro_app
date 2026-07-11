@@ -1,4 +1,4 @@
-import type { PlanetName } from "../astro/constants";
+import type { PlanetSlot } from "../astro/types";
 import type { CenterInfo } from "../astro/format";
 import { houseOfRasi } from "../astro/charts";
 import { SOUTH_INDIAN_GRID_POSITIONS } from "../astro/southIndianGrid";
@@ -6,7 +6,7 @@ import { RasiCell } from "./RasiCell";
 
 interface Props {
   ascendantRasi: number;
-  placement: Record<number, { planet: PlanetName; isRetrograde: boolean }[]>;
+  placement: Record<number, PlanetSlot[]>;
   centerInfo?: CenterInfo;
   showHouseNumber?: boolean;
   draggable?: boolean;

@@ -1,9 +1,9 @@
-import type { PlanetName } from "../astro/constants";
+import type { PlanetSlot } from "../astro/types";
 import { RasiCell } from "./RasiCell";
 
 interface Props {
   ascendantRasi: number;
-  placement: Record<number, { planet: PlanetName; isRetrograde: boolean }[]>;
+  placement: Record<number, PlanetSlot[]>;
   showHouseNumber?: boolean;
   draggable?: boolean;
 }
