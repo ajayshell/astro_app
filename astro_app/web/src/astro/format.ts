@@ -16,12 +16,22 @@ export const PLANET_ABBR: Record<PlanetName, string> = {
 
 export const RASI_ABBR = RASI_NAMES.map((n) => n.slice(0, 3));
 
-export function formatDegree(siderealLongitude: number): string {
+export interface DegreeParts {
+  deg: number;
+  minText: string; // zero-padded, e.g. "05"
+}
+
+export function degreeParts(siderealLongitude: number): DegreeParts {
   const withinSign = siderealLongitude % 30;
   const deg = Math.floor(withinSign);
   const minFloat = (withinSign - deg) * 60;
   const min = Math.floor(minFloat);
-  return `${deg}°${min.toString().padStart(2, "0")}'`;
+  return { deg, minText: min.toString().padStart(2, "0") };
+}
+
+export function formatDegree(siderealLongitude: number): string {
+  const { deg, minText } = degreeParts(siderealLongitude);
+  return `${deg}°${minText}'`;
 }
 
 export interface CenterInfo {

@@ -604,9 +604,10 @@ header h1 {
 
 /* The 6x6 Jamakol ring leaves each inner rasi-cell far smaller than the
    main chart's cells, so a phone-width grid can't fit the same
-   name+degree+tags stack per planet without the cell scrolling internally.
-   Degrees/dignity are already shown in full on the Overview chart, so drop
-   them here and keep just the planet name (with its retrograde marker). */
+   name+degree(+minutes)+tags stack per planet without the cell scrolling
+   internally. Keep the whole-degree number (still useful on its own) but
+   drop the minutes and the dignity/retrograde tags -- those are shown in
+   full on the Overview chart. */
 @media (max-width: 480px) {
   .jamakol-grid .rasi-cell {
     font-size: 0.6rem;
@@ -621,8 +622,9 @@ header h1 {
     font-size: 0.6rem;
   }
 
-  .jamakol-grid .planet-chip-degree,
-  .jamakol-grid .planet-chip-tags {
+  .jamakol-grid .planet-chip-minutes,
+  .jamakol-grid .planet-chip-tags,
+  .jamakol-grid .rasi-marker-minutes {
     display: none;
   }
 }

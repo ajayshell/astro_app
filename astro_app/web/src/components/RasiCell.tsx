@@ -1,7 +1,7 @@
 import { useDroppable } from "@dnd-kit/core";
 import type { PlanetName } from "../astro/constants";
 import { getDignity } from "../astro/dignity";
-import { formatDegree } from "../astro/format";
+import { degreeParts } from "../astro/format";
 import { PlanetChip } from "./PlanetChip";
 import { useI18n } from "../i18n/LanguageContext";
 
@@ -26,6 +26,18 @@ interface Props {
   className?: string;
   style?: React.CSSProperties;
   draggable?: boolean;
+}
+
+// Renders "{deg}°{min}'" with the minutes in their own span, so CSS can hide
+// just the minutes on the cramped Jamakol inner grid without losing the
+// whole-degree number entirely (same technique as PlanetChip's degree).
+function MarkerDegree({ longitude, className }: { longitude: number; className: string }) {
+  const { deg, minText } = degreeParts(longitude);
+  return (
+    <span className={className}>
+      {" "}{deg}°<span className="rasi-marker-minutes">{minText}'</span>
+    </span>
+  );
 }
 
 export function RasiCell({
@@ -60,19 +72,19 @@ export function RasiCell({
         {isAarudom && (
           <span className="rasi-aarudom-marker">
             {t("aarudom")}
-            {aarudomDegree !== undefined && <span className="rasi-aarudom-degree"> {formatDegree(aarudomDegree)}</span>}
+            {aarudomDegree !== undefined && <MarkerDegree longitude={aarudomDegree} className="rasi-aarudom-degree" />}
           </span>
         )}
         {isUdayam && (
           <span className="rasi-udayam-marker">
             {t("udayam")}
-            {udayamLongitude !== undefined && <span className="rasi-udayam-degree"> {formatDegree(udayamLongitude)}</span>}
+            {udayamLongitude !== undefined && <MarkerDegree longitude={udayamLongitude} className="rasi-udayam-degree" />}
           </span>
         )}
         {isKavippu && (
           <span className="rasi-kavippu-marker">
             {t("kavippu")}
-            {kavippuDegree !== undefined && <span className="rasi-kavippu-degree"> {formatDegree(kavippuDegree)}</span>}
+            {kavippuDegree !== undefined && <MarkerDegree longitude={kavippuDegree} className="rasi-kavippu-degree" />}
           </span>
         )}
       </div>

@@ -1,7 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import type { PlanetName } from "../astro/constants";
 import type { Dignity } from "../astro/dignity";
-import { formatDegree, PLANET_ABBR } from "../astro/format";
+import { degreeParts } from "../astro/format";
 import { useI18n } from "../i18n/LanguageContext";
 
 interface Props {
@@ -17,7 +17,8 @@ export function PlanetChip({ planet, isRetrograde, siderealLongitude, dignity, d
     id: planet,
     disabled: !draggable,
   });
-  const { t } = useI18n();
+  const { t, planetAbbr } = useI18n();
+  const { deg, minText } = degreeParts(siderealLongitude);
 
   const style: React.CSSProperties = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
@@ -35,10 +36,12 @@ export function PlanetChip({ planet, isRetrograde, siderealLongitude, dignity, d
       {...(draggable ? attributes : {})}
     >
       <span className={`planet-chip-name ${dignity ? `planet-chip-${dignity}` : ""}`}>
-        {PLANET_ABBR[planet]}
+        {planetAbbr(planet)}
         {isRetrograde && <sup>R</sup>}
       </span>
-      <span className="planet-chip-degree">{formatDegree(siderealLongitude)}</span>
+      <span className="planet-chip-degree">
+        {deg}°<span className="planet-chip-minutes">{minText}'</span>
+      </span>
       {(dignity || isRetrograde) && (
         <span className="planet-chip-tags">
           {dignity === "exalted" && <span className="planet-chip-tag tag-uccha">{t("uccha")}</span>}

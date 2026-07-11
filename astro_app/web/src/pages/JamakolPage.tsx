@@ -322,7 +322,7 @@ export function JamakolPage() {
             </div>
           )}
 
-          {udayam && (
+          {udayam && import.meta.env.VITE_DEBUG === "true" && (
             <div className="summary">
               <h3>{t("udayamDebugTitle")}</h3>
               <p>{t("udayamS")}: {udayam.S.toFixed(2)}</p>

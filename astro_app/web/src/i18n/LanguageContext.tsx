@@ -2,12 +2,13 @@ import { createContext, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { RASI_NAMES, NAKSHATRA_NAMES, WEEKDAY_NAMES } from "../astro/constants";
 import type { PlanetName } from "../astro/constants";
-import { RASI_ABBR } from "../astro/format";
+import { RASI_ABBR, PLANET_ABBR } from "../astro/format";
 import { CHARA_KARAKA_NAMES } from "../astro/charaKaraka";
 import {
   ASCENDANT_MARKER,
   CHARA_KARAKA_NAMES_TA,
   NAKSHATRA_NAMES_TA,
+  PLANET_ABBR_TA,
   PLANET_NAMES_TA,
   RASI_ABBR_TA,
   RASI_NAMES_TA,
@@ -23,6 +24,7 @@ interface I18n {
   rasiLabel: (rasiIndex: number) => string;
   rasiFullName: (rasiIndex: number) => string;
   planetName: (planet: PlanetName) => string;
+  planetAbbr: (planet: PlanetName) => string;
   nakshatraName: (nakshatraIndex: number) => string;
   karakaName: (karakaIndex: number) => string;
   ascendantMarker: () => string;
@@ -39,6 +41,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const rasiLabel = (rasiIndex: number) => (language === "ta" ? RASI_ABBR_TA[rasiIndex] : RASI_ABBR[rasiIndex]);
     const rasiFullName = (rasiIndex: number) => (language === "ta" ? RASI_NAMES_TA[rasiIndex] : RASI_NAMES[rasiIndex]);
     const planetName = (planet: PlanetName) => (language === "ta" ? PLANET_NAMES_TA[planet] : planet);
+    const planetAbbr = (planet: PlanetName) => (language === "ta" ? PLANET_ABBR_TA[planet] : PLANET_ABBR[planet]);
     const nakshatraName = (nakshatraIndex: number) =>
       language === "ta" ? NAKSHATRA_NAMES_TA[nakshatraIndex] : NAKSHATRA_NAMES[nakshatraIndex];
     const karakaName = (karakaIndex: number) =>
@@ -54,6 +57,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       rasiLabel,
       rasiFullName,
       planetName,
+      planetAbbr,
       nakshatraName,
       karakaName,
       ascendantMarker,

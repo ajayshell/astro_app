@@ -145,6 +145,21 @@ export const PLANET_NAMES_TA: Record<string, string> = {
   Ketu: "கேது",
 };
 
+// Short forms for cramped chart-grid cells, same role as PLANET_ABBR
+// (astro/format.ts) but for Tamil -- a truncation of PLANET_NAMES_TA rather
+// than a 2-letter initialism, since that reads better for Tamil syllables.
+export const PLANET_ABBR_TA: Record<string, string> = {
+  Sun: "சூர்",
+  Moon: "சந்",
+  Mars: "செவ்",
+  Mercury: "புத",
+  Jupiter: "குரு",
+  Venus: "சுக்",
+  Saturn: "சனி",
+  Rahu: "ராகு",
+  Ketu: "கேது",
+};
+
 // Index-aligned with CHARA_KARAKA_NAMES in astro/charaKaraka.ts.
 export const CHARA_KARAKA_NAMES_TA = [
   "ஆத்மகாரகன்", "அமைச்சகாரகன்", "சகோதரகாரகன்", "மாதுர்காரகன்",

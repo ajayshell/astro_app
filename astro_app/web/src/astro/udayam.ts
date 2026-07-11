@@ -53,13 +53,17 @@ export function computeUdayam(referenceInstant: Date, sunrise: Date, sunset: Dat
   };
 
   // Explicit log prints for testing/feedback, per request -- check the
-  // browser console when trying different times.
-  // eslint-disable-next-line no-console
-  console.log("[Udayam] reference:", referenceInstant.toISOString(), "sunrise:", sunrise.toISOString(), "sunset:", sunset.toISOString());
-  // eslint-disable-next-line no-console
-  console.log(
-    `[Udayam] S=${S.toFixed(2)} min, daytimeMinutes=${daytimeMinutes.toFixed(2)}, D=${D.toFixed(4)} min/deg, degreesForward=${degreesForward.toFixed(2)}, sunLongitude=${sunLongitude.toFixed(2)}, destinationLongitude=${destinationLongitude.toFixed(2)}, rasiIndex=${rasiIndex}`,
-  );
+  // browser console when trying different times. Gated behind VITE_DEBUG so
+  // production builds stay quiet (run `VITE_DEBUG=true npm run dev` locally
+  // to turn this back on).
+  if (import.meta.env.VITE_DEBUG === "true") {
+    // eslint-disable-next-line no-console
+    console.log("[Udayam] reference:", referenceInstant.toISOString(), "sunrise:", sunrise.toISOString(), "sunset:", sunset.toISOString());
+    // eslint-disable-next-line no-console
+    console.log(
+      `[Udayam] S=${S.toFixed(2)} min, daytimeMinutes=${daytimeMinutes.toFixed(2)}, D=${D.toFixed(4)} min/deg, degreesForward=${degreesForward.toFixed(2)}, sunLongitude=${sunLongitude.toFixed(2)}, destinationLongitude=${destinationLongitude.toFixed(2)}, rasiIndex=${rasiIndex}`,
+    );
+  }
 
   return calc;
 }
