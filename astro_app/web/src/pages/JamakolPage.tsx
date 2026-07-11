@@ -3,9 +3,8 @@ import { DateTime } from "luxon";
 import tzlookup from "tz-lookup";
 import { DndContext } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
-import { CITIES } from "../data/cities";
 import { resolveTimezone } from "../astro/timezone";
-import { localWallClockToUtc } from "../astro/util";
+import { localWallClockToUtc, weekdayIndexForDate } from "../astro/util";
 import { computeJamakol } from "../astro/jamakol";
 import type { JamakolGraha, JamakolResult } from "../astro/jamakol";
 import { computeChart, buildPlacementMap } from "../astro/charts";
@@ -19,11 +18,14 @@ import { computeUdayam } from "../astro/udayam";
 import type { UdayamCalc } from "../astro/udayam";
 import { computeSooryaVeedhi } from "../astro/sooryaVeedhi";
 import type { SooryaVeedhiCalc } from "../astro/sooryaVeedhi";
+import { computeRahuYamaGulika } from "../astro/rahukalam";
+import type { RahuYamaGulikaResult } from "../astro/rahukalam";
 import { RasiCell } from "../components/RasiCell";
+import { PlaceSelector, CUSTOM_OPTION } from "../components/PlaceSelector";
 import { useI18n } from "../i18n/LanguageContext";
 import { useBirthDetails } from "../context/BirthDetailsContext";
+import { useCities } from "../context/CitiesContext";
 
-const CUSTOM_OPTION = "__custom__";
 const DEFAULT_CITY = "Bengaluru";
 
 // Anti-clockwise from the top-left corner, in a 6x6 grid: the 8 ring boxes
@@ -55,21 +57,11 @@ function fmtTime(d: Date, zoneName: string): string {
   return DateTime.fromJSDate(d).setZone(zoneName).toFormat("h:mm a");
 }
 
-// Weekday index (0 = Sunday .. 6 = Saturday) for a "YYYY-MM-DD" date string,
-// or null if not yet filled in. Built from the parts directly (not
-// `new Date(dateStr)`) so the calendar date isn't shifted by a day in
-// timezones where that string would otherwise be parsed as UTC midnight.
-function weekdayIndexForDate(dateStr: string): number | null {
-  if (!dateStr) return null;
-  const [year, month, day] = dateStr.split("-").map(Number);
-  if (!year || !month || !day) return null;
-  return new Date(year, month - 1, day).getDay();
-}
-
 export function JamakolPage() {
   const { t, planetName, rasiFullName, weekdayName } = useI18n();
-  const { date, setDate, time, setTime, cityName, setCityName, customLat, setCustomLat, customLon, setCustomLon } =
+  const { date, setDate, time, setTime, cityId, setCityId, customLat, setCustomLat, customLon, setCustomLon } =
     useBirthDetails();
+  const { cities } = useCities();
   const [placeLabel, setPlaceLabel] = useState(DEFAULT_CITY);
   const [result, setResult] = useState<JamakolResult | null>(null);
   const [chart, setChart] = useState<ChartResult | null>(null);
@@ -77,9 +69,10 @@ export function JamakolPage() {
   const [aarudom, setAarudom] = useState<AarudomCalc | null>(null);
   const [udayam, setUdayam] = useState<UdayamCalc | null>(null);
   const [sooryaVeedhi, setSooryaVeedhi] = useState<SooryaVeedhiCalc | null>(null);
+  const [rahuYamaGulika, setRahuYamaGulika] = useState<RahuYamaGulikaResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const usingCustom = cityName === CUSTOM_OPTION;
+  const usingCustom = cityId === CUSTOM_OPTION;
   const weekdayIndex = weekdayIndexForDate(date);
 
   function grahaName(g: JamakolGraha): string {
@@ -87,7 +80,7 @@ export function JamakolPage() {
   }
 
   function resolveLocation(): { latitude: number; longitude: number; placeName: string } | null {
-    const city = CITIES.find((c) => c.name === cityName);
+    const city = cities?.find((c) => c.id === cityId);
     const latitude = usingCustom ? parseFloat(customLat) : city!.latitude;
     const longitude = usingCustom ? parseFloat(customLon) : city!.longitude;
 
@@ -99,7 +92,7 @@ export function JamakolPage() {
       setError(t("latLonRange"));
       return null;
     }
-    return { latitude, longitude, placeName: usingCustom ? `${latitude}, ${longitude}` : cityName };
+    return { latitude, longitude, placeName: usingCustom ? `${latitude}, ${longitude}` : city!.name };
   }
 
   function generate(
@@ -132,6 +125,7 @@ export function JamakolPage() {
       const udayamCalc = computeUdayam(referenceInstant, jamakolResult.sunrise, jamakolResult.sunset, sun.siderealLongitude);
       setUdayam(udayamCalc);
       setSooryaVeedhi(computeSooryaVeedhi(sun.rasi, aarudomCalc.rasiIndex, aarudomCalc.degree, udayamCalc.rasiIndex));
+      setRahuYamaGulika(computeRahuYamaGulika(dateStr, referenceInstant, latitude, longitude));
       setPlaceLabel(placeName);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("tzError"));
@@ -182,11 +176,13 @@ export function JamakolPage() {
   // Generate a chart for whatever date/time/place is currently shared (see
   // BirthDetailsContext) on mount -- this also re-runs whenever the tab is
   // switched back to Jamakol, so a date/time/place chosen on the Horoscope
-  // page carries over here rather than always resetting to "now".
+  // page carries over here rather than always resetting to "now". Waits for
+  // the (lazily loaded) city list, since the default place is looked up by id.
   useEffect(() => {
+    if (!cities) return;
     generateFromCurrentState();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [cities]);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -285,30 +281,14 @@ export function JamakolPage() {
               <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
             </label>
 
-            <label>
-              {t("placeOfBirth")}
-              <select value={cityName} onChange={(e) => setCityName(e.target.value)}>
-                {CITIES.map((c) => (
-                  <option key={c.name} value={c.name}>
-                    {c.name}, {c.state}
-                  </option>
-                ))}
-                <option value={CUSTOM_OPTION}>{t("customCoordinates")}</option>
-              </select>
-            </label>
-
-            {usingCustom && (
-              <div className="custom-coords">
-                <label>
-                  {t("latitude")}
-                  <input type="number" step="any" value={customLat} onChange={(e) => setCustomLat(e.target.value)} />
-                </label>
-                <label>
-                  {t("longitude")}
-                  <input type="number" step="any" value={customLon} onChange={(e) => setCustomLon(e.target.value)} />
-                </label>
-              </div>
-            )}
+            <PlaceSelector
+              cityId={cityId}
+              setCityId={setCityId}
+              customLat={customLat}
+              setCustomLat={setCustomLat}
+              customLon={customLon}
+              setCustomLon={setCustomLon}
+            />
 
             {error && <p className="form-error">{error}</p>}
 
@@ -317,6 +297,25 @@ export function JamakolPage() {
               {t("useNow")}
             </button>
           </form>
+
+          {rahuYamaGulika && (
+            <div className="summary">
+              <h3>{t("rahuYamaGulikaTitle")}</h3>
+              <p>
+                {t("rahukalam")}: {fmtTime(rahuYamaGulika.rahukalam.start, rahuYamaGulika.zoneName)} –{" "}
+                {fmtTime(rahuYamaGulika.rahukalam.end, rahuYamaGulika.zoneName)}
+              </p>
+              <p>
+                {t("yamakandam")}: {fmtTime(rahuYamaGulika.yamagandam.start, rahuYamaGulika.zoneName)} –{" "}
+                {fmtTime(rahuYamaGulika.yamagandam.end, rahuYamaGulika.zoneName)}
+              </p>
+              <p>
+                {t("gulikaal")}: {fmtTime(rahuYamaGulika.gulikakalam.start, rahuYamaGulika.zoneName)} –{" "}
+                {fmtTime(rahuYamaGulika.gulikakalam.end, rahuYamaGulika.zoneName)}
+              </p>
+              <p className="summary-caveat">{t("rahuYamaGulikaCaveat")}</p>
+            </div>
+          )}
 
           {result && (
             <div className="summary">

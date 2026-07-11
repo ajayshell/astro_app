@@ -7,7 +7,11 @@ import type { ReactNode } from "react";
 export interface BirthDetailsState {
   date: string;
   time: string;
-  cityName: string;
+  // City id (data/cities.ts `City.id`, a GeoNames city id), or CUSTOM_OPTION
+  // if custom coordinates are being used. Not the city *name* -- at ~24k
+  // entries there are hundreds of duplicate names (multiple "Raipur"s,
+  // "San Pedro"s, etc.), so name alone can't uniquely identify a selection.
+  cityId: string;
   customLat: string;
   customLon: string;
 }
@@ -15,15 +19,16 @@ export interface BirthDetailsState {
 interface BirthDetailsContextValue extends BirthDetailsState {
   setDate: (v: string) => void;
   setTime: (v: string) => void;
-  setCityName: (v: string) => void;
+  setCityId: (v: string) => void;
   setCustomLat: (v: string) => void;
   setCustomLon: (v: string) => void;
 }
 
+// "1277333" = Bengaluru's id in data/cities.ts.
 const DEFAULT_STATE: BirthDetailsState = {
   date: "1974-04-16",
   time: "10:04",
-  cityName: "Bengaluru",
+  cityId: "1277333",
   customLat: "12.9716",
   customLon: "77.5946",
 };
@@ -33,7 +38,7 @@ const BirthDetailsContext = createContext<BirthDetailsContextValue | null>(null)
 export function BirthDetailsProvider({ children }: { children: ReactNode }) {
   const [date, setDate] = useState(DEFAULT_STATE.date);
   const [time, setTime] = useState(DEFAULT_STATE.time);
-  const [cityName, setCityName] = useState(DEFAULT_STATE.cityName);
+  const [cityId, setCityId] = useState(DEFAULT_STATE.cityId);
   const [customLat, setCustomLat] = useState(DEFAULT_STATE.customLat);
   const [customLon, setCustomLon] = useState(DEFAULT_STATE.customLon);
 
@@ -42,8 +47,8 @@ export function BirthDetailsProvider({ children }: { children: ReactNode }) {
     setDate,
     time,
     setTime,
-    cityName,
-    setCityName,
+    cityId,
+    setCityId,
     customLat,
     setCustomLat,
     customLon,

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Runs the test suite before allowing a push. Installed via
+# `git config core.hooksPath astro_app/.githooks` (see astro_app/runserver.sh
+# or PROJECT_BRIEF.md for the one-time setup command). Bypass with
+# `git push --no-verify` if you really need to.
+set -euo pipefail
+
+cd "$(dirname "$0")/../web"
+echo "Running tests before push..."
+npm test

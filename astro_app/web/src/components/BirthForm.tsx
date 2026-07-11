@@ -1,27 +1,27 @@
 import { useEffect, useState } from "react";
-import { CITIES } from "../data/cities";
 import { resolveTimezone } from "../astro/timezone";
 import type { BirthInput } from "../astro/types";
 import { useI18n } from "../i18n/LanguageContext";
 import { useBirthDetails } from "../context/BirthDetailsContext";
+import { useCities } from "../context/CitiesContext";
+import { PlaceSelector, CUSTOM_OPTION } from "./PlaceSelector";
 
 interface Props {
   onSubmit: (input: BirthInput) => void;
 }
 
-const CUSTOM_OPTION = "__custom__";
-
 export function BirthForm({ onSubmit }: Props) {
   const { t } = useI18n();
-  const { date, setDate, time, setTime, cityName, setCityName, customLat, setCustomLat, customLon, setCustomLon } =
+  const { date, setDate, time, setTime, cityId, setCityId, customLat, setCustomLat, customLon, setCustomLon } =
     useBirthDetails();
+  const { cities } = useCities();
   const [name, setName] = useState("Aj");
   const [error, setError] = useState<string | null>(null);
 
-  const usingCustom = cityName === CUSTOM_OPTION;
+  const usingCustom = cityId === CUSTOM_OPTION;
 
   function buildInput(): BirthInput | null {
-    const city = CITIES.find((c) => c.name === cityName);
+    const city = cities?.find((c) => c.id === cityId);
     const latitude = usingCustom ? parseFloat(customLat) : city!.latitude;
     const longitude = usingCustom ? parseFloat(customLon) : city!.longitude;
 
@@ -44,7 +44,7 @@ export function BirthForm({ onSubmit }: Props) {
       longitude,
       timezoneOffsetHours: offsetHours,
       timezoneName: zoneName,
-      placeName: usingCustom ? `${latitude}, ${longitude}` : cityName,
+      placeName: usingCustom ? `${latitude}, ${longitude}` : city!.name,
     };
   }
 
@@ -60,8 +60,10 @@ export function BirthForm({ onSubmit }: Props) {
   }
 
   // Generate a chart for the default birth details on first load, so the
-  // page isn't empty before the user has touched the form.
+  // page isn't empty before the user has touched the form. Waits for the
+  // (lazily loaded) city list, since the default place is looked up by id.
   useEffect(() => {
+    if (!cities) return;
     try {
       const input = buildInput();
       if (input) onSubmit(input);
@@ -69,7 +71,7 @@ export function BirthForm({ onSubmit }: Props) {
       // Leave the form empty; the user can still submit manually.
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [cities]);
 
   return (
     <form className="birth-form" onSubmit={handleSubmit}>
@@ -90,40 +92,14 @@ export function BirthForm({ onSubmit }: Props) {
         <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
       </label>
 
-      <label>
-        {t("placeOfBirth")}
-        <select value={cityName} onChange={(e) => setCityName(e.target.value)}>
-          {CITIES.map((c) => (
-            <option key={c.name} value={c.name}>
-              {c.name}, {c.state}
-            </option>
-          ))}
-          <option value={CUSTOM_OPTION}>{t("customCoordinates")}</option>
-        </select>
-      </label>
-
-      {usingCustom && (
-        <div className="custom-coords">
-          <label>
-            {t("latitude")}
-            <input
-              type="number"
-              step="any"
-              value={customLat}
-              onChange={(e) => setCustomLat(e.target.value)}
-            />
-          </label>
-          <label>
-            {t("longitude")}
-            <input
-              type="number"
-              step="any"
-              value={customLon}
-              onChange={(e) => setCustomLon(e.target.value)}
-            />
-          </label>
-        </div>
-      )}
+      <PlaceSelector
+        cityId={cityId}
+        setCityId={setCityId}
+        customLat={customLat}
+        setCustomLat={setCustomLat}
+        customLon={customLon}
+        setCustomLon={setCustomLon}
+      />
 
       {error && <p className="form-error">{error}</p>}
 

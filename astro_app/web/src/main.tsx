@@ -4,12 +4,15 @@ import './index.css'
 import App from './App.tsx'
 import { LanguageProvider } from './i18n/LanguageContext.tsx'
 import { BirthDetailsProvider } from './context/BirthDetailsContext.tsx'
+import { CitiesProvider } from './context/CitiesContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <LanguageProvider>
       <BirthDetailsProvider>
-        <App />
+        <CitiesProvider>
+          <App />
+        </CitiesProvider>
       </BirthDetailsProvider>
     </LanguageProvider>
   </StrictMode>,

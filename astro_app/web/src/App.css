@@ -31,6 +31,12 @@ body {
   gap: 0.6rem;
 }
 
+.top-bar-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .contact-us-badge {
   display: inline-flex;
   align-items: center;
@@ -165,6 +171,14 @@ header h1 {
   margin-bottom: 0.85rem;
 }
 
+.summary-caveat {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--text);
+  opacity: 0.75;
+  margin-top: 0.6rem;
+}
+
 .birth-form label, .controls label {
   display: flex;
   flex-direction: column;
@@ -198,6 +212,12 @@ header h1 {
 .custom-coords label {
   min-width: 0;
   flex: 1 1 0;
+}
+
+.data-credit {
+  font-size: 0.72rem;
+  opacity: 0.6;
+  margin: -0.4rem 0 0.75rem;
 }
 
 .form-error {
@@ -694,4 +714,117 @@ header h1 {
   font-size: 0.75em;
   font-weight: 600;
   opacity: 0.75;
+}
+
+.user-guide-page {
+  text-align: left;
+  padding-top: 1rem;
+}
+
+.back-to-home {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 44px;
+  margin-bottom: 1.5rem;
+}
+
+.back-to-home:hover {
+  background: var(--accent-border);
+}
+
+.user-guide-content {
+  max-width: 780px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem 2rem;
+  box-shadow: var(--shadow);
+  line-height: 1.6;
+}
+
+.user-guide-content h1 {
+  font-size: 1.7rem;
+  margin: 0 0 0.75rem;
+}
+
+.user-guide-content h2 {
+  font-size: 1.25rem;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+  margin: 2rem 0 0.85rem;
+}
+
+.user-guide-content h2:first-of-type {
+  margin-top: 1rem;
+}
+
+.user-guide-content h3 {
+  font-size: 1.05rem;
+  color: var(--text-h);
+  margin: 1.4rem 0 0.5rem;
+}
+
+.user-guide-content p {
+  margin: 0 0 0.9rem;
+}
+
+.user-guide-content ul, .user-guide-content ol {
+  margin: 0 0 0.9rem;
+  padding-left: 1.4rem;
+}
+
+.user-guide-content li {
+  margin-bottom: 0.4rem;
+}
+
+.user-guide-content li > ul, .user-guide-content li > ol {
+  margin-top: 0.4rem;
+}
+
+.user-guide-content strong {
+  color: var(--text-h);
+}
+
+.user-guide-content code {
+  font-family: var(--mono);
+  background: var(--code-bg);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.9em;
+}
+
+.user-guide-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.75rem 0;
+}
+
+.user-guide-content a {
+  color: var(--accent);
+}
+
+@media (max-width: 480px) {
+  .user-guide-content {
+    padding: 1.1rem 1.15rem 1.5rem;
+  }
+
+  .user-guide-content h1 {
+    font-size: 1.35rem;
+  }
+
+  .user-guide-content h2 {
+    font-size: 1.05rem;
+  }
 }

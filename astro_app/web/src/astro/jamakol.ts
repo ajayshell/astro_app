@@ -1,6 +1,5 @@
-import * as Astronomy from "astronomy-engine";
-import tzlookup from "tz-lookup";
 import type { PlanetName } from "./constants";
+import { computeSunTimes } from "./sunTimes";
 
 export type JamakolGraha = PlanetName | "Maandi";
 
@@ -61,19 +60,7 @@ function splitIntoFour(start: Date, end: Date): [Date, Date][] {
 }
 
 export function computeJamakol(referenceInstant: Date, latitude: number, longitude: number): JamakolResult {
-  const observer = new Astronomy.Observer(latitude, longitude, 0);
-
-  const sunriseTime = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, 1, referenceInstant, -2);
-  if (!sunriseTime) throw new Error("Could not find sunrise for this location/date (polar location?).");
-  const sunsetTime = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, -1, sunriseTime, 2);
-  if (!sunsetTime) throw new Error("Could not find sunset for this location/date (polar location?).");
-  const nextSunriseTime = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, 1, sunsetTime, 2);
-  if (!nextSunriseTime) throw new Error("Could not find next sunrise for this location/date (polar location?).");
-
-  const sunrise = sunriseTime.date;
-  const sunset = sunsetTime.date;
-  const nextSunrise = nextSunriseTime.date;
-  const zoneName = tzlookup(latitude, longitude);
+  const { sunrise, sunset, nextSunrise, zoneName } = computeSunTimes(referenceInstant, latitude, longitude);
 
   // TODO: rotate the ring's starting position by weekday once that rule is
   // confirmed (see file header) -- always starts at Surya for now.
