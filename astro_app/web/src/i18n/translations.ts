@@ -70,6 +70,7 @@ export const UI_TEXT: Dict = {
   retro: { en: "Retro", ta: "வக்ரம்" },
   tabHoroscope: { en: "Horoscope", ta: "ஜாதகம்" },
   tabJamakol: { en: "Jamakol", ta: "ஜாமக்கோளம்" },
+  contactUs: { en: "Contact us", ta: "எங்களை தொடர்பு கொள்ள" },
   jamakolTitle: { en: "Jamakol Chart", ta: "ஜாமக்கோள ஜாதகம்" },
   jamakolSubtitle: {
     en: "Jamakol (8-fold sunrise-to-sunrise division) — for astrologer review",

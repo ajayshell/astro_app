@@ -3,6 +3,7 @@ import { HoroscopePage } from "./pages/HoroscopePage";
 import { JamakolPage } from "./pages/JamakolPage";
 import { useI18n } from "./i18n/LanguageContext";
 import type { Language } from "./i18n/translations";
+import { SUPPORT_EMAIL } from "./config";
 import "./App.css";
 
 type Page = "horoscope" | "jamakol";
@@ -14,6 +15,9 @@ function App() {
   return (
     <div className="app-shell">
       <div className="top-bar">
+        <a className="contact-us-badge" href={`mailto:${SUPPORT_EMAIL}`}>
+          {t("contactUs")}: {SUPPORT_EMAIL}
+        </a>
         <label className="language-toggle">
           {t("language")}
           <select value={language} onChange={(e) => setLanguage(e.target.value as Language)}>

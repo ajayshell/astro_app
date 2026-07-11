@@ -21,6 +21,7 @@ import { computeSooryaVeedhi } from "../astro/sooryaVeedhi";
 import type { SooryaVeedhiCalc } from "../astro/sooryaVeedhi";
 import { RasiCell } from "../components/RasiCell";
 import { useI18n } from "../i18n/LanguageContext";
+import { useBirthDetails } from "../context/BirthDetailsContext";
 
 const CUSTOM_OPTION = "__custom__";
 const DEFAULT_CITY = "Bengaluru";
@@ -67,11 +68,8 @@ function weekdayIndexForDate(dateStr: string): number | null {
 
 export function JamakolPage() {
   const { t, planetName, rasiFullName, weekdayName } = useI18n();
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [cityName, setCityName] = useState(DEFAULT_CITY);
-  const [customLat, setCustomLat] = useState("12.9716");
-  const [customLon, setCustomLon] = useState("77.5946");
+  const { date, setDate, time, setTime, cityName, setCityName, customLat, setCustomLat, customLon, setCustomLon } =
+    useBirthDetails();
   const [placeLabel, setPlaceLabel] = useState(DEFAULT_CITY);
   const [result, setResult] = useState<JamakolResult | null>(null);
   const [chart, setChart] = useState<ChartResult | null>(null);
@@ -140,8 +138,7 @@ export function JamakolPage() {
     }
   }
 
-  function handleGenerate(e: React.FormEvent) {
-    e.preventDefault();
+  function generateFromCurrentState() {
     const location = resolveLocation();
     if (!location) return;
     try {
@@ -158,6 +155,11 @@ export function JamakolPage() {
     } catch {
       setError(t("tzError"));
     }
+  }
+
+  function handleGenerate(e: React.FormEvent) {
+    e.preventDefault();
+    generateFromCurrentState();
   }
 
   function handleUseNow() {
@@ -177,9 +179,12 @@ export function JamakolPage() {
     }
   }
 
-  // Default the page to "now" at the default place on first load.
+  // Generate a chart for whatever date/time/place is currently shared (see
+  // BirthDetailsContext) on mount -- this also re-runs whenever the tab is
+  // switched back to Jamakol, so a date/time/place chosen on the Horoscope
+  // page carries over here rather than always resetting to "now".
   useEffect(() => {
-    handleUseNow();
+    generateFromCurrentState();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

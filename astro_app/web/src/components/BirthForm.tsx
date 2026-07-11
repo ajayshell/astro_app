@@ -3,22 +3,19 @@ import { CITIES } from "../data/cities";
 import { resolveTimezone } from "../astro/timezone";
 import type { BirthInput } from "../astro/types";
 import { useI18n } from "../i18n/LanguageContext";
+import { useBirthDetails } from "../context/BirthDetailsContext";
 
 interface Props {
   onSubmit: (input: BirthInput) => void;
 }
 
 const CUSTOM_OPTION = "__custom__";
-const DEFAULT_CITY = "Bengaluru";
 
 export function BirthForm({ onSubmit }: Props) {
   const { t } = useI18n();
+  const { date, setDate, time, setTime, cityName, setCityName, customLat, setCustomLat, customLon, setCustomLon } =
+    useBirthDetails();
   const [name, setName] = useState("Aj");
-  const [date, setDate] = useState("1974-04-16");
-  const [time, setTime] = useState("10:04");
-  const [cityName, setCityName] = useState(DEFAULT_CITY);
-  const [customLat, setCustomLat] = useState("12.9716");
-  const [customLon, setCustomLon] = useState("77.5946");
   const [error, setError] = useState<string | null>(null);
 
   const usingCustom = cityName === CUSTOM_OPTION;
