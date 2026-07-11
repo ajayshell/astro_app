@@ -221,6 +221,7 @@ export function JamakolPage() {
                     isAscendant={rasi === chart.ascendantRasi}
                     isAarudom={rasi === aarudomRasi}
                     isUdayam={rasi === udayam?.rasiIndex}
+                    udayamLongitude={rasi === udayam?.rasiIndex ? udayam?.destinationLongitude : undefined}
                     isKavippu={rasi === sooryaVeedhi?.kavippuRasi}
                     planets={placement[rasi] ?? []}
                     style={{ gridRow: row, gridColumn: col }}

@@ -322,6 +322,12 @@ header h1 {
   font-weight: 700;
 }
 
+.rasi-udayam-degree {
+  font-size: 0.85em;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
 .rasi-kavippu-marker {
   color: #dc2626;
   font-weight: 700;
