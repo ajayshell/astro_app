@@ -77,7 +77,7 @@ export const UI_TEXT: Dict = {
   tabJamakol: { en: "Jamakol", ta: "ஜாமக்கோளம்" },
   contactUs: { en: "Contact us", ta: "எங்களை தொடர்பு கொள்ள" },
   userGuide: { en: "User guide", ta: "பயனர் வழிகாட்டி" },
-  backToHome: { en: "← Back to home", ta: "← முகப்புக்குத் திரும்பு" },
+  backToHome: { en: "Back to home", ta: "முகப்புக்குத் திரும்பு" },
   jamakolTitle: { en: "Jamakol Chart", ta: "ஜாமக்கோள ஜாதகம்" },
   jamakolSubtitle: {
     en: "Jamakol (8-fold sunrise-to-sunrise division) — for astrologer review",

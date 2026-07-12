@@ -210,13 +210,13 @@ export function JamakolPage() {
   }
 
   return (
-    <>
+    <div className="page-fade-in">
       <header>
         <h1>{t("jamakolTitle")}</h1>
         <p className="subtitle">{t("jamakolSubtitle")}</p>
       </header>
 
-      <div className="app-body">
+      <div className="app-body jamakol-page">
         <p className="jamakol-warning">{t("jamakolWarning")}</p>
 
         <section className="charts-row">
@@ -339,6 +339,6 @@ export function JamakolPage() {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

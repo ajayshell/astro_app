@@ -55,6 +55,41 @@ chart style automatically applies to the other. The Jamakol page's inner
 4×4 grid reuses `RasiCell` directly, positioned inside its own larger 6×6
 ring layout (`SOUTH_INDIAN_GRID_POSITIONS`, shifted by one row/column).
 
+### Visual design
+
+- **Two accent colors, used for wayfinding, not decoration.** `--accent`
+  (warm saffron/orange) is the default everywhere. `--accent-2` (deep
+  indigo) marks the Jamakol "zone" specifically — its tab, its cards' top
+  borders and headings, its submit button — plus the User guide badge/page,
+  so each has its own identity rather than every screen reading identically
+  regardless of section. Don't reach for `--accent-2` decoratively outside
+  those two zones; it's a location signal, not a second brand color to
+  sprinkle around.
+- **Display font for h1/h2 only.** `Playfair Display`, self-hosted (`src/
+  assets/fonts/`, SIL OFL license) rather than a runtime CDN dependency —
+  consistent with this project's offline-friendly ethos. Has no Tamil
+  glyphs; falls back to `--sans` automatically per-character (verified:
+  mixed English/Tamil headings render correctly with no missing glyphs,
+  nothing to configure per-language). Not applied to h3/h4 — those are
+  small, uppercase, letter-spaced card-section labels where a display serif
+  reads poorly; they stay on `--sans`.
+- **Icons are hand-drawn inline SVG** (`components/Icons.tsx`), not an icon
+  library — this project's app-wide preference for minimal dependencies.
+  Add more there as needed rather than reaching for a package.
+- **Cards**: 16px radius, a soft large-blur/low-opacity shadow (`--shadow`
+  in `index.css`) that deepens slightly on hover with a small upward lift —
+  intentionally softer than the smaller-radius/tighter-shadow "dashboard
+  card" look this app started with.
+- **Motion**: a shared `.page-fade-in` class (fade + slight rise,
+  `@keyframes pageFadeIn` in `App.css`) applied to each page's root element,
+  and re-triggered via React `key` changes for in-page state changes that
+  should still feel like a "new view" (e.g. Overview ↔ Explore). Buttons/
+  badges get a hover lift + press scale-down + explicit `:focus-visible`
+  ring, consistently, via shared classes rather than one-off per-component
+  rules. Table rows (Vimshottari Dasha's expand/collapse) fade in on reveal
+  instead of animating height, which doesn't work reliably cross-browser
+  for `<tr>` elements. Everything respects `prefers-reduced-motion`.
+
 ### Mobile
 
 Deliberately audited/tuned as its own pass (not incidental) — see

@@ -11,6 +11,30 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+/* Applied to each page's root element (and re-keyed on Overview/Explore
+   view-mode changes) so switching tabs or views is a soft fade+rise instead
+   of an instant hard swap. Respects reduced-motion preferences. */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-fade-in {
+  animation: pageFadeIn 0.28s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-fade-in, .dasha-row {
+    animation: none;
+  }
+}
+
 .app-shell {
   max-width: 1300px;
   margin: 0 auto;
@@ -50,10 +74,23 @@ body {
   font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .contact-us-badge:hover {
   background: var(--accent-border);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px -4px rgba(180, 83, 9, 0.5);
+}
+
+.contact-us-badge:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.contact-us-badge:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 @media (max-width: 480px) {
@@ -61,6 +98,23 @@ body {
     font-size: 0.75rem;
     padding: 0.35rem 0.6rem;
   }
+}
+
+/* Secondary accent (indigo) -- marks the User guide / Jamakol "zone" of the
+   app apart from the primary orange used everywhere else, for wayfinding. */
+.badge-secondary {
+  background: var(--accent-2-bg);
+  border-color: var(--accent-2-border);
+  color: var(--accent-2);
+}
+
+.badge-secondary:hover {
+  background: var(--accent-2-border);
+  box-shadow: 0 4px 10px -4px rgba(55, 48, 163, 0.5);
+}
+
+.badge-secondary:focus-visible {
+  outline-color: var(--accent-2);
 }
 
 .language-toggle {
@@ -94,12 +148,32 @@ body {
   opacity: 0.6;
   cursor: pointer;
   min-height: 44px;
+  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab-bar button:hover {
+  opacity: 0.85;
+}
+
+.tab-bar button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .tab-bar button.tab-active {
   opacity: 1;
   color: var(--accent);
   border-bottom-color: var(--accent);
+}
+
+.tab-bar button.tab-active:hover {
+  opacity: 1;
+}
+
+.tab-bar button.tab-active-secondary {
+  color: var(--accent-2);
+  border-bottom-color: var(--accent-2);
 }
 
 header {
@@ -155,9 +229,15 @@ header h1 {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-top: 3px solid var(--accent);
-  border-radius: 10px;
-  padding: 1.1rem 1.15rem;
+  border-radius: 16px;
+  padding: 1.25rem 1.4rem;
   box-shadow: var(--shadow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.birth-form:hover, .controls:hover, .summary:hover {
+  box-shadow: rgba(8, 6, 13, 0.1) 0 28px 36px -12px, rgba(8, 6, 13, 0.06) 0 10px 14px -6px;
+  transform: translateY(-2px);
 }
 
 .birth-form h2, .controls h3, .summary h3 {
@@ -169,6 +249,21 @@ header h1 {
   border-bottom: 1px solid var(--border);
   padding-bottom: 0.5rem;
   margin-bottom: 0.85rem;
+}
+
+/* Jamakol's cards use the secondary (indigo) accent instead of orange,
+   matching its tab -- gives the page its own "zone" identity rather than
+   every card in the app reading identically regardless of section. */
+.jamakol-page .birth-form,
+.jamakol-page .controls,
+.jamakol-page .summary {
+  border-top-color: var(--accent-2);
+}
+
+.jamakol-page .birth-form h2,
+.jamakol-page .controls h3,
+.jamakol-page .summary h3 {
+  color: var(--accent-2);
 }
 
 .summary-caveat {
@@ -229,12 +324,28 @@ header h1 {
   font-family: inherit;
   font-size: 0.95rem;
   padding: 0.6rem 1.1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--card-bg);
   cursor: pointer;
   min-height: 44px;
   margin: 0.25rem 0.5rem 0 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.birth-form button:hover {
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px -4px rgba(8, 6, 13, 0.15);
+}
+
+.birth-form button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.birth-form button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .birth-form button[type="submit"] {
@@ -242,6 +353,21 @@ header h1 {
   color: #fff;
   border-color: var(--accent);
   font-weight: 700;
+}
+
+.birth-form button[type="submit"]:hover {
+  background: color-mix(in srgb, var(--accent) 88%, black);
+  box-shadow: 0 6px 16px -6px rgba(180, 83, 9, 0.6);
+}
+
+.jamakol-page .birth-form button[type="submit"] {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+.jamakol-page .birth-form button[type="submit"]:hover {
+  background: color-mix(in srgb, var(--accent-2) 88%, black);
+  box-shadow: 0 6px 16px -6px rgba(55, 48, 163, 0.6);
 }
 
 .pending-note {
@@ -355,6 +481,7 @@ header h1 {
 .chart-panel-grid .chart-panel .rasi-cell-diamond {
   min-width: 2.5rem;
   max-width: 4rem;
+  max-height: 4.25rem;
 }
 
 .chart-panel-grid .chart-panel .rasi-cell-diamond .rasi-cell-header {
@@ -493,8 +620,16 @@ header h1 {
   border: none;
   min-width: 3.5rem;
   max-width: 5.5rem;
+  /* Cells are absolutely positioned and centered on their own anchor point
+     with no collision-avoidance between neighbors -- without a max-height,
+     a crowded cell (2+ planets with tags) grows tall and visually bleeds
+     into the next cell instead of triggering the overflow:auto fallback
+     .rasi-cell already sets (that only ever caught horizontal growth, since
+     max-width was the only bound). */
+  max-height: 6rem;
   text-align: center;
   align-items: center;
+  justify-content: center;
   background: transparent;
 }
 
@@ -516,6 +651,17 @@ header h1 {
   flex: 1 1 380px;
   min-width: 380px;
   max-width: 480px;
+}
+
+/* .chart-panel has no width of its own -- as a bare flex item (direct child
+   of .charts-row in Explore mode, not inside .chart-panel-grid) that meant
+   its child's `width: 100%` (.north-indian-wrap/.south-indian-grid) had
+   nothing real to resolve against and rendered far smaller than its own
+   800px cap, which in turn made North Indian's already-tight house-anchor
+   spacing (see NorthIndianChart.tsx) collide even more than it should. */
+.charts-row > .chart-panel {
+  width: 100%;
+  max-width: 800px;
 }
 
 /* A 380px-per-panel minimum doesn't fit any phone in portrait -- stack the
@@ -580,6 +726,29 @@ header h1 {
   cursor: pointer;
   margin-right: 0.35rem;
   font-family: monospace;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.dasha-toggle:hover {
+  background: var(--accent-bg);
+}
+
+.dasha-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Table rows can't animate height reliably cross-browser -- a quick fade
+   on mount gives sub-period rows a smooth "reveal" when expanded instead of
+   the previous hard instant pop-in. */
+@keyframes rowFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dasha-row {
+  animation: rowFadeIn 0.25s ease;
 }
 
 .dasha-row.depth-1 td:first-child {
@@ -621,7 +790,7 @@ header h1 {
   background: #fef3c7;
   border: 1px solid #f59e0b;
   color: #78350f;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   font-weight: 600;
@@ -724,6 +893,7 @@ header h1 {
 .back-to-home {
   display: inline-flex;
   align-items: center;
+  gap: 0.4rem;
   padding: 0.5rem 1rem;
   border-radius: 999px;
   background: var(--accent-bg);
@@ -735,10 +905,22 @@ header h1 {
   cursor: pointer;
   min-height: 44px;
   margin-bottom: 1.5rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .back-to-home:hover {
   background: var(--accent-border);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px -4px rgba(180, 83, 9, 0.5);
+}
+
+.back-to-home:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.back-to-home:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .user-guide-content {
@@ -746,8 +928,11 @@ header h1 {
   margin: 0 auto;
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-top: 3px solid var(--accent);
-  border-radius: 10px;
+  /* Secondary (indigo) accent -- matches the User guide badge that opens
+     this page, so the "zone" reads consistently rather than switching back
+     to orange once you're actually on the page. */
+  border-top: 3px solid var(--accent-2);
+  border-radius: 16px;
   padding: 1.5rem 1.75rem 2rem;
   box-shadow: var(--shadow);
   line-height: 1.6;
@@ -760,7 +945,7 @@ header h1 {
 
 .user-guide-content h2 {
   font-size: 1.25rem;
-  color: var(--accent);
+  color: var(--accent-2);
   border-bottom: 1px solid var(--border);
   padding-bottom: 0.4rem;
   margin: 2rem 0 0.85rem;
@@ -812,7 +997,7 @@ header h1 {
 }
 
 .user-guide-content a {
-  color: var(--accent);
+  color: var(--accent-2);
 }
 
 @media (max-width: 480px) {

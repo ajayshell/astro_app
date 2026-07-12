@@ -5,6 +5,7 @@ import { UserGuidePage } from "./pages/UserGuidePage";
 import { useI18n } from "./i18n/LanguageContext";
 import type { Language } from "./i18n/translations";
 import { SUPPORT_EMAIL } from "./config";
+import { MailIcon, BookIcon } from "./components/Icons";
 import "./App.css";
 
 type Page = "horoscope" | "jamakol" | "userGuide";
@@ -18,9 +19,11 @@ function App() {
       <div className="top-bar">
         <div className="top-bar-badges">
           <a className="contact-us-badge" href={`mailto:${SUPPORT_EMAIL}`}>
+            <MailIcon />
             {t("contactUs")}: {SUPPORT_EMAIL}
           </a>
-          <button type="button" className="contact-us-badge" onClick={() => setPage("userGuide")}>
+          <button type="button" className="contact-us-badge badge-secondary" onClick={() => setPage("userGuide")}>
+            <BookIcon />
             {t("userGuide")}
           </button>
         </div>
@@ -38,7 +41,11 @@ function App() {
           <button type="button" className={page === "horoscope" ? "tab-active" : ""} onClick={() => setPage("horoscope")}>
             {t("tabHoroscope")}
           </button>
-          <button type="button" className={page === "jamakol" ? "tab-active" : ""} onClick={() => setPage("jamakol")}>
+          <button
+            type="button"
+            className={page === "jamakol" ? "tab-active tab-active-secondary" : ""}
+            onClick={() => setPage("jamakol")}
+          >
             {t("tabJamakol")}
           </button>
         </nav>

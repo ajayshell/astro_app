@@ -45,7 +45,7 @@ export function HoroscopePage() {
   }
 
   return (
-    <>
+    <div className="page-fade-in">
       <header>
         <h1>{t("horoscopeTitle")}</h1>
         <p className="subtitle">{t("subtitle")}</p>
@@ -63,7 +63,7 @@ export function HoroscopePage() {
           </label>
         )}
 
-        <section className="charts-row">
+        <section className="charts-row page-fade-in" key={view}>
           {chart ? (
             view === "overview" ? (
               <div className="chart-panel-grid">
@@ -195,6 +195,6 @@ export function HoroscopePage() {
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }
