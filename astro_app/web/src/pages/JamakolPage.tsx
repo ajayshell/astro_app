@@ -5,8 +5,10 @@ import { DndContext } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { resolveTimezone } from "../astro/timezone";
 import { localWallClockToUtc, weekdayIndexForDate } from "../astro/util";
-import { computeJamakol } from "../astro/jamakol";
+import { computeJamakol, RING_ORDER } from "../astro/jamakol";
 import type { JamakolGraha, JamakolResult } from "../astro/jamakol";
+import { computeJamagraha } from "../astro/jamagraha";
+import type { JamagrahaCalc } from "../astro/jamagraha";
 import { computeChart, buildPlacementMap } from "../astro/charts";
 import type { ChartResult } from "../astro/types";
 import type { PlanetName } from "../astro/constants";
@@ -20,6 +22,7 @@ import { computeSooryaVeedhi } from "../astro/sooryaVeedhi";
 import type { SooryaVeedhiCalc } from "../astro/sooryaVeedhi";
 import { computeRahuYamaGulika } from "../astro/rahukalam";
 import type { RahuYamaGulikaResult } from "../astro/rahukalam";
+import { to12HourTime, formatDegreeFull } from "../astro/format";
 import { RasiCell } from "../components/RasiCell";
 import { PlaceSelector, CUSTOM_OPTION } from "../components/PlaceSelector";
 import { useI18n } from "../i18n/LanguageContext";
@@ -53,6 +56,12 @@ const INNER_GRID_POSITIONS = SOUTH_INDIAN_GRID_POSITIONS.map(({ rasi, row, col }
   col: col + 1,
 }));
 
+// A dedicated callout box for the Jamagraha marker (deity + degree), rather
+// than crowding it into the already-dense Raasi cell header alongside
+// Aarudom/planets. Sits in a corner of the 6x6 grid that's genuinely unused
+// by both the ring (RING_POSITIONS above) and the inner 4x4 D1 block.
+const JAMAGRAHA_BOX_POSITION = { row: 3, col: 1 };
+
 function fmtTime(d: Date, zoneName: string): string {
   return DateTime.fromJSDate(d).setZone(zoneName).toFormat("h:mm a");
 }
@@ -70,6 +79,7 @@ export function JamakolPage() {
   const [udayam, setUdayam] = useState<UdayamCalc | null>(null);
   const [sooryaVeedhi, setSooryaVeedhi] = useState<SooryaVeedhiCalc | null>(null);
   const [rahuYamaGulika, setRahuYamaGulika] = useState<RahuYamaGulikaResult | null>(null);
+  const [jamagraha, setJamagraha] = useState<JamagrahaCalc | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const usingCustom = cityId === CUSTOM_OPTION;
@@ -106,7 +116,9 @@ export function JamakolPage() {
   ) {
     try {
       setError(null);
-      const jamakolResult = computeJamakol(referenceInstant, latitude, longitude);
+      const jamagrahaCalc = computeJamagraha(dateStr, timeStr, RING_ORDER);
+      setJamagraha(jamagrahaCalc);
+      const jamakolResult = computeJamakol(referenceInstant, latitude, longitude, jamagrahaCalc.ringStart);
       setResult(jamakolResult);
       const newChart = computeChart({
         name: "Jamakol",
@@ -164,7 +176,7 @@ export function JamakolPage() {
       const zoneName = tzlookup(location.latitude, location.longitude);
       const local = DateTime.fromJSDate(now).setZone(zoneName);
       const dateStr = local.toFormat("yyyy-MM-dd");
-      const timeStr = local.toFormat("HH:mm");
+      const timeStr = local.toFormat("HH:mm:ss");
       setDate(dateStr);
       setTime(timeStr);
       generate(now, dateStr, timeStr, location.latitude, location.longitude, local.offset / 60, location.placeName);
@@ -225,8 +237,8 @@ export function JamakolPage() {
               <div className="jamakol-grid">
                 <div className="jamakol-center" style={{ gridRow: "3 / span 2", gridColumn: "3 / span 2" }}>
                   <span>{date.split("-").reverse().join("-")}</span>
-                  <span>{time}</span>
-                  <span>{placeLabel}</span>
+                  <span>{to12HourTime(time)}</span>
+                  <span>{weekdayIndex !== null ? `${weekdayName(weekdayIndex)}, ${placeLabel}` : placeLabel}</span>
                 </div>
                 {INNER_GRID_POSITIONS.map(({ rasi, row, col }) => (
                   <RasiCell
@@ -243,6 +255,15 @@ export function JamakolPage() {
                     style={{ gridRow: row, gridColumn: col }}
                   />
                 ))}
+                {jamagraha && (
+                  <div
+                    className="jamakol-jamagraha-box"
+                    style={{ gridRow: JAMAGRAHA_BOX_POSITION.row, gridColumn: JAMAGRAHA_BOX_POSITION.col }}
+                  >
+                    <span className="jamakol-jamagraha-graha">{grahaName(jamagraha.deity)}</span>
+                    <span className="jamakol-jamagraha-degree">{formatDegreeFull(jamagraha.degree360)}</span>
+                  </div>
+                )}
                 {result.periods.map((p) => {
                   const pos = RING_POSITIONS[p.ringPosition];
                   const isCurrent = result.periods.indexOf(p) === result.currentIndex;
@@ -278,7 +299,7 @@ export function JamakolPage() {
 
             <label>
               {t("timeOfBirth")}
-              <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
+              <input type="time" step="1" value={time} onChange={(e) => setTime(e.target.value)} required />
             </label>
 
             <PlaceSelector
@@ -335,6 +356,16 @@ export function JamakolPage() {
               <p>{t("udayamSunLongitude")}: {udayam.sunLongitude.toFixed(2)}°</p>
               <p>{t("udayamDestination")}: {udayam.destinationLongitude.toFixed(2)}°</p>
               <p>{t("udayamSquare")}: {rasiFullName(udayam.rasiIndex)}</p>
+            </div>
+          )}
+
+          {jamagraha && import.meta.env.VITE_DEBUG === "true" && (
+            <div className="summary">
+              <h3>{t("jamagrahaDebugTitle")}</h3>
+              <p>{t("jamagrahaWeekday")}: {weekdayName(jamagraha.weekdayIndex)}</p>
+              <p>{t("jamagrahaDeity")}: {grahaName(jamagraha.deity)}</p>
+              <p>{t("jamagrahaDegree")}: {jamagraha.degree360.toFixed(2)}°</p>
+              <p>{t("jamagrahaSquare")}: {rasiFullName(jamagraha.rasiIndex)} {jamagraha.degree.toFixed(2)}°</p>
             </div>
           )}
         </div>

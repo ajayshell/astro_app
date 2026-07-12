@@ -89,7 +89,7 @@ export function BirthForm({ onSubmit }: Props) {
 
       <label>
         {t("timeOfBirth")}
-        <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
+        <input type="time" step="1" value={time} onChange={(e) => setTime(e.target.value)} required />
       </label>
 
       <PlaceSelector

@@ -288,7 +288,8 @@ header h1 {
    on phones) page root size. */
 .birth-form input, .birth-form select,
 .controls select,
-.custom-coords input {
+.custom-coords input,
+.combobox input {
   font-size: 16px;
   font-weight: normal;
 }
@@ -307,6 +308,87 @@ header h1 {
 .custom-coords label {
   min-width: 0;
   flex: 1 1 0;
+}
+
+/* Type-to-filter dropdown (Combobox.tsx), used for Country/State/City so
+   long option lists (e.g. ~650 cities in one US state) don't require
+   scrolling a native <select> to find an entry. */
+.combobox {
+  position: relative;
+}
+
+.combobox input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-h);
+  font-family: inherit;
+}
+
+.combobox input:disabled {
+  opacity: 0.6;
+}
+
+.combobox input:focus,
+.combobox-open input {
+  outline: none;
+  border-color: var(--accent-border);
+}
+
+.jamakol-page .combobox-open input {
+  border-color: var(--accent-2-border);
+}
+
+.combobox-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+
+.combobox-option {
+  padding: 0.4rem 0.55rem;
+  border-radius: 6px;
+  font-weight: normal;
+  font-size: 0.95rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.combobox-option-highlight,
+.combobox-option:hover {
+  background: var(--accent-bg);
+}
+
+.jamakol-page .combobox-option-highlight,
+.jamakol-page .combobox-option:hover {
+  background: var(--accent-2-bg);
+}
+
+.combobox-option[aria-selected="true"] {
+  font-weight: 700;
+}
+
+.combobox-empty {
+  padding: 0.4rem 0.55rem;
+  font-size: 0.9rem;
+  opacity: 0.65;
 }
 
 .data-credit {
@@ -880,6 +962,25 @@ header h1 {
 }
 
 .jamakol-cell-degree {
+  font-size: 0.75em;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+/* Jamagraha marker (JAMAGRAHA_BOX_POSITION, JamakolPage.tsx) -- plain text
+   sitting in its grid cell, no card/border/fill, unlike the ring boxes. */
+.jamakol-jamagraha-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  color: #1e3a8a;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.jamakol-jamagraha-degree {
   font-size: 0.75em;
   font-weight: 600;
   opacity: 0.75;

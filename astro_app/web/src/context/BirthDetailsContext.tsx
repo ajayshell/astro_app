@@ -27,7 +27,7 @@ interface BirthDetailsContextValue extends BirthDetailsState {
 // "1277333" = Bengaluru's id in data/cities.ts.
 const DEFAULT_STATE: BirthDetailsState = {
   date: "1974-04-16",
-  time: "10:04",
+  time: "10:04:00",
   cityId: "1277333",
   customLat: "12.9716",
   customLon: "77.5946",

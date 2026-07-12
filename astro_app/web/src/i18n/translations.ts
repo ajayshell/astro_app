@@ -17,6 +17,7 @@ export const UI_TEXT: Dict = {
   customCoordinates: { en: "Custom coordinates...", ta: "விருப்ப அட்ச/தீர்க்கரேகை..." },
   loadingPlaces: { en: "Loading places…", ta: "இடங்கள் ஏற்றப்படுகின்றன…" },
   placeDataCredit: { en: "Place data © GeoNames.org (CC BY 4.0)", ta: "இட தரவு © GeoNames.org (CC BY 4.0)" },
+  noMatches: { en: "No matches", ta: "பொருத்தம் இல்லை" },
   latitude: { en: "Latitude", ta: "அட்சரேகை" },
   longitude: { en: "Longitude", ta: "தீர்க்கரேகை" },
   generateChart: { en: "Generate chart", ta: "ஜாதகம் உருவாக்கு" },
@@ -118,6 +119,11 @@ export const UI_TEXT: Dict = {
   udayamSquare: { en: "Landed square", ta: "விழும் கட்டம்" },
   udayamSunLongitude: { en: "Sun longitude (start)", ta: "சூரிய பாகை (தொடக்கம்)" },
   udayamDestination: { en: "Destination longitude", ta: "இலக்கு பாகை" },
+  jamagrahaDebugTitle: { en: "Jamagraha calculation (debug)", ta: "ஜாமகிரகம் கணக்கீடு (சரிபார்ப்பு)" },
+  jamagrahaWeekday: { en: "Weekday", ta: "கிழமை" },
+  jamagrahaDeity: { en: "Weekday's ruling graha", ta: "கிழமை அதிபதி" },
+  jamagrahaDegree: { en: "Degree (D)", ta: "பாகை (D)" },
+  jamagrahaSquare: { en: "sqE square", ta: "sqE கட்டம்" },
 };
 
 export const ASCENDANT_MARKER: { en: string; ta: string } = { en: "As", ta: "La" };

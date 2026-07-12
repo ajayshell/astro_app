@@ -16,19 +16,29 @@ export type JamakolGraha = PlanetName | "Maandi";
  *   - on a Sunday, Surya sits in the top-left box (= the jamam right after
  *     sunrise).
  *
+ * Two independent placements happen per box, not one:
+ *   - WHICH JAMAM (chronological time period) sits in a box: always fixed --
+ *     the jamam right after sunrise is box 0 (top-left), and so on around
+ *     the ring in period order. This never rotates.
+ *   - WHICH GRAHA'S NAME is shown in a box: rotates by `ringStart`, computed
+ *     by `computeJamagraha` (astro/jamagraha.ts) per the "Rule for placement
+ *     of Jamagraha" in rules/soorya_veedhi.txt -- a degree-based formula
+ *     from the birth time, CONFIRMED by the user (2026-07-11) after the
+ *     rule text was updated to explicitly say "outer BLUE boxes" (this
+ *     ring's own color in the UI). Previously hardcoded to 0 (always Surya
+ *     in the top-left box) because no linear "shift by weekday index" rule
+ *     fit the reference data -- a reference Thursday chart showed Maandi,
+ *     not Surya/Guru, in the top-left box, which a same-weekday-every-time
+ *     shift can't produce but a birth-minute-dependent rotation can.
+ *
  * NOT YET CONFIRMED -- flag before relying on this:
- *   - How the starting box rotates for the other six weekdays. A reference
- *     chart for a Thursday showed Maandi (not Surya) in the top-left box,
- *     which rules out the obvious "shift by weekday index" rule -- no linear
- *     rule fits both the Sunday and Thursday data points. Until the real rule
- *     is known, this always starts at Surya regardless of weekday.
  *   - Maandi is placed as a label only; its own classical calculation (a
  *     time-of-day-dependent upagraha position) is not implemented.
  *   - The meaning of the "degree" shown per box (this build uses 0/45/90/.../
  *     315, one per jamam) has not been confirmed against source material.
  */
 
-const RING_ORDER: JamakolGraha[] = ["Sun", "Mars", "Jupiter", "Mercury", "Venus", "Saturn", "Moon", "Maandi"];
+export const RING_ORDER: JamakolGraha[] = ["Sun", "Mars", "Jupiter", "Mercury", "Venus", "Saturn", "Moon", "Maandi"];
 
 export interface JamakolPeriod {
   ringPosition: number; // 0-7, anti-clockwise from top-left
@@ -59,24 +69,22 @@ function splitIntoFour(start: Date, end: Date): [Date, Date][] {
   return quarters;
 }
 
-export function computeJamakol(referenceInstant: Date, latitude: number, longitude: number): JamakolResult {
+export function computeJamakol(referenceInstant: Date, latitude: number, longitude: number, ringStart = 0): JamakolResult {
   const { sunrise, sunset, nextSunrise, zoneName } = computeSunTimes(referenceInstant, latitude, longitude);
-
-  // TODO: rotate the ring's starting position by weekday once that rule is
-  // confirmed (see file header) -- always starts at Surya for now.
-  const ringStart = 0;
 
   const periods: JamakolPeriod[] = [];
   const daySegments = splitIntoFour(sunrise, sunset);
   const nightSegments = splitIntoFour(sunset, nextSunrise);
 
   daySegments.forEach(([start, end], i) => {
-    const ringPosition = (ringStart + i) % 8;
-    periods.push({ ringPosition, degree: ringPosition * 45, isDay: true, graha: RING_ORDER[ringPosition], start, end });
+    const ringPosition = i; // chronological -- always fixed, doesn't rotate
+    const graha = RING_ORDER[(ringPosition + ringStart) % 8];
+    periods.push({ ringPosition, degree: ringPosition * 45, isDay: true, graha, start, end });
   });
   nightSegments.forEach(([start, end], i) => {
-    const ringPosition = (ringStart + 4 + i) % 8;
-    periods.push({ ringPosition, degree: ringPosition * 45, isDay: false, graha: RING_ORDER[ringPosition], start, end });
+    const ringPosition = 4 + i;
+    const graha = RING_ORDER[(ringPosition + ringStart) % 8];
+    periods.push({ ringPosition, degree: ringPosition * 45, isDay: false, graha, start, end });
   });
 
   periods.sort((a, b) => a.ringPosition - b.ringPosition);

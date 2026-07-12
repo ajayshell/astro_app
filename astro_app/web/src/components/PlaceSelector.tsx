@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "../i18n/LanguageContext";
 import { useCities } from "../context/CitiesContext";
+import { Combobox } from "./Combobox";
 
 export const CUSTOM_OPTION = "__custom__";
 
@@ -27,19 +28,22 @@ export function PlaceSelector({ cityId, setCityId, customLat, setCustomLat, cust
   const [country, setCountry] = useState("");
   const [state, setState] = useState("");
 
-  // Countries in the order they appear in cities.ts (India first, then
-  // alphabetical -- see generate-cities.cjs).
+  // India and the United States are pinned to the top (primary and largest
+  // secondary audience for this app), rest of the countries alphabetical --
+  // this is just the default order shown before the user types anything
+  // into the Combobox below; typing filters regardless of position.
   const countries = useMemo(() => {
     if (!cities) return [];
     const seen = new Set<string>();
-    const list: string[] = [];
+    const rest: string[] = [];
     for (const c of cities) {
-      if (!seen.has(c.country)) {
+      if (!seen.has(c.country) && c.country !== "India" && c.country !== "United States") {
         seen.add(c.country);
-        list.push(c.country);
+        rest.push(c.country);
       }
     }
-    return list;
+    rest.sort((a, b) => a.localeCompare(b));
+    return ["India", "United States", ...rest];
   }, [cities]);
 
   const statesInCountry = useMemo(() => {
@@ -94,37 +98,36 @@ export function PlaceSelector({ cityId, setCityId, customLat, setCustomLat, cust
     <>
       <label>
         {t("country")}
-        <select value={country} onChange={(e) => handleCountryChange(e.target.value)} disabled={!cities}>
-          {!cities && <option value="">{t("loadingPlaces")}</option>}
-          {countries.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        <Combobox
+          value={country}
+          onChange={handleCountryChange}
+          options={countries.map((c) => ({ value: c, label: c }))}
+          placeholder={cities ? undefined : t("loadingPlaces")}
+          disabled={!cities}
+        />
       </label>
 
       <label>
         {t("stateProvince")}
-        <select value={state} onChange={(e) => handleStateChange(e.target.value)} disabled={!cities}>
-          {statesInCountry.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <Combobox
+          value={state}
+          onChange={handleStateChange}
+          options={statesInCountry.map((s) => ({ value: s, label: s }))}
+          disabled={!cities}
+        />
       </label>
 
       <label>
         {t("city")}
-        <select value={cityId} onChange={(e) => setCityId(e.target.value)} disabled={!cities}>
-          {citiesInState.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-          <option value={CUSTOM_OPTION}>{t("customCoordinates")}</option>
-        </select>
+        <Combobox
+          value={cityId}
+          onChange={setCityId}
+          options={[
+            ...citiesInState.map((c) => ({ value: c.id, label: c.name })),
+            { value: CUSTOM_OPTION, label: t("customCoordinates") },
+          ]}
+          disabled={!cities}
+        />
       </label>
       <p className="data-credit">{t("placeDataCredit")}</p>
 
