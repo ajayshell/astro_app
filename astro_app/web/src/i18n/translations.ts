@@ -77,6 +77,9 @@ export const UI_TEXT: Dict = {
   tabHoroscope: { en: "Horoscope", ta: "ஜாதகம்" },
   tabJamakol: { en: "Jamakol", ta: "ஜாமக்கோளம்" },
   contactUs: { en: "Contact us", ta: "எங்களை தொடர்பு கொள்ள" },
+  reportError: { en: "Report an error", ta: "பிழையை தெரிவிக்க" },
+  reportErrorSubject: { en: "Astro App - Error Report", ta: "Astro App - பிழை அறிக்கை" },
+  reportErrorDescribeIssue: { en: "Describe the issue you noticed:", ta: "நீங்கள் கவனித்த பிழையை விவரிக்கவும்:" },
   userGuide: { en: "User guide", ta: "பயனர் வழிகாட்டி" },
   backToHome: { en: "Back to home", ta: "முகப்புக்குத் திரும்பு" },
   jamakolTitle: { en: "Jamakol Chart", ta: "ஜாமக்கோள ஜாதகம்" },
@@ -124,6 +127,7 @@ export const UI_TEXT: Dict = {
   jamagrahaDeity: { en: "Weekday's ruling graha", ta: "கிழமை அதிபதி" },
   jamagrahaDegree: { en: "Degree (D)", ta: "பாகை (D)" },
   jamagrahaSquare: { en: "sqE square", ta: "sqE கட்டம்" },
+  jamagrahaCalcTraceTitle: { en: "Jamagraha degree calculation (raw)", ta: "ஜாமகிரகம் பாகை கணக்கீடு (மூலம்)" },
 };
 
 export const ASCENDANT_MARKER: { en: string; ta: string } = { en: "As", ta: "La" };

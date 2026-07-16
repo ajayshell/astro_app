@@ -880,6 +880,36 @@ header h1 {
   margin: 0 auto 1.5rem;
 }
 
+/* Debug-mode preset buttons (src/debug/debugPresets.ts, gated behind
+   VITE_DEBUG) -- deliberately distinct from the rest of the UI (dashed
+   border, monospace) so it reads as a dev-only affordance. */
+.debug-preset-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  max-width: 700px;
+  margin: 0 auto 1.5rem;
+  padding: 0.6rem;
+  border: 1px dashed color-mix(in srgb, currentColor 40%, transparent);
+  border-radius: 12px;
+}
+
+.debug-preset-bar button {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  cursor: pointer;
+}
+
+.debug-preset-bar button:hover {
+  border-color: var(--accent-2-border);
+  background: var(--accent-2-bg);
+}
+
 .jamakol-grid {
   position: relative;
   display: grid;
@@ -967,23 +997,38 @@ header h1 {
   opacity: 0.75;
 }
 
-/* Jamagraha marker (JAMAGRAHA_BOX_POSITION, JamakolPage.tsx) -- plain text
-   sitting in its grid cell, no card/border/fill, unlike the ring boxes. */
-.jamakol-jamagraha-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.2rem;
-  color: #1e3a8a;
-  font-size: 0.85rem;
-  font-weight: 700;
+/* Debug-only raw calculation trace (JamakolPage.tsx, gated behind
+   isDebugMode) -- a plain white console-style box, deliberately distinct
+   from the app's cream `.summary` cards so it reads as a dev-only readout. */
+.jamakol-calc-trace {
+  flex: 1 1 280px;
+  min-width: 260px;
+  max-width: 380px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: var(--shadow);
 }
 
-.jamakol-jamagraha-degree {
-  font-size: 0.75em;
-  font-weight: 600;
-  opacity: 0.75;
+.jamakol-calc-trace h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-2);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.jamakol-calc-trace pre {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: #111827;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .user-guide-page {

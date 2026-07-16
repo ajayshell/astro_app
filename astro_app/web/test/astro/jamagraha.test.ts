@@ -12,12 +12,13 @@ describe("computeJamagraha", () => {
     expect(calc.weekdayIndex).toBe(6); // Saturday
     expect(calc.deity).toBe("Saturn");
     expect(calc.degree360).toBeCloseTo(324, 5);
-    expect(calc.rasiIndex).toBe(10); // Aquarius
+    expect(calc.rasiIndex).toBe(10); // Aquarius (the rule's own example says "Cap" here, likely a leftover slip -- see jamagraha.ts header)
     expect(calc.degree).toBeCloseTo(24, 5);
-    // Ring: 324 / 45 = 7.2 -> ring box 7 gets Saturn (canonical index 5),
-    // so the whole sequence is rotated 6 steps forward.
-    expect(calc.ringStart).toBe(6);
-    expect(RING_ORDER[(7 + calc.ringStart) % 8]).toBe("Saturn");
+    // Aquarius's outward step is blank (not a real ring box); the next real
+    // box continuing anticlockwise is ring box 1, which is also where a
+    // direct "Cap" reading would have landed -- both readings agree here.
+    expect(calc.ringStart).toBe(4);
+    expect(RING_ORDER[(1 + calc.ringStart) % 8]).toBe("Saturn");
   });
 
   it("uses the plain (unshifted) birth-date weekday, not a time-adjusted date", () => {
@@ -34,18 +35,66 @@ describe("computeJamagraha", () => {
     expect(calc.degree360).toBeCloseTo(360 - 225 / 2, 5);
   });
 
-  it("normalizes cleanly when A goes non-positive (birth hour <= 6)", () => {
-    // hour12(1)=1, A=1-6=-5, B=-5*60+0=-300, C=-150, D=360-(-150)=510 -> normalized 150.
+  it("normalizes cleanly when A goes non-positive (birth hour <= 6) and lands on a sign with a direct ring box (Virgo)", () => {
+    // hour12(1)=1, A=1-6=-5, B=-5*60+0=-300, C=-150, D=360-(-150)=510 -> normalized 150 -> Virgo.
     const calc = computeJamagraha("2024-01-08", "01:00", RING_ORDER);
     expect(calc.degree360).toBeCloseTo(150, 5);
+    expect(calc.rasiIndex).toBe(5); // Virgo
   });
 
-  it("ringStart rotates the rest of RING_ORDER's fixed cyclic order from the deity's box, not just that box", () => {
+  it("lands on a sign whose outward step is blank (Leo) and anchors at the next real ring box", () => {
+    // hour12(2)=2, A=2-6=-4, B=-240, C=-120, D=360-(-120)=480 -> normalized 120 -> Leo.
+    const calc = computeJamagraha("2024-01-08", "02:00", RING_ORDER);
+    expect(calc.rasiIndex).toBe(4); // Leo
+    // Leo's outward step is blank; the next real ring box anticlockwise is box 5.
+    expect(RING_ORDER[(5 + calc.ringStart) % 8]).toBe(calc.deity);
+  });
+
+  it("matches the confirmed real-world example: 11:14:16am Sunday in Krishnagiri (Libra, direct ring box)", () => {
+    // hour12(11)=11, A=5, B=5*60+14+16/60=314.2667, C=157.1333, D=202.8667.
+    const calc = computeJamagraha("2026-07-12", "11:14:16", RING_ORDER);
+    expect(calc.weekdayIndex).toBe(0); // Sunday
+    expect(calc.deity).toBe("Sun");
+    expect(calc.degree360).toBeCloseTo(202.8667, 3);
+    expect(calc.rasiIndex).toBe(6); // Libra
+    expect(RING_ORDER[(3 + calc.ringStart) % 8]).toBe("Sun");
+  });
+
+  it("folds seconds into B as a fractional minute (2026-07-15 fix: seconds were being silently dropped)", () => {
+    // Hand-checked by the user: hour12(11:39:38am)=11, A=5,
+    // B = 5*60 + 39 + 38/60 = 339.6333, C = 169.8167, D = 190.1833
+    // (190 degrees, 0.1833*60 = 11.0 minutes -- the app had been showing
+    // 190deg 30' by computing B = 339 exactly, dropping the 38 seconds).
+    const calc = computeJamagraha("2026-07-14", "11:39:38", RING_ORDER);
+    expect(calc.degree360).toBeCloseTo(190.1833, 3);
+  });
+
+  it("ringStart rotates the rest of RING_ORDER's fixed cyclic order from the deity's anchor box, not just that box", () => {
     const calc = computeJamagraha("2024-01-06", "19:12", RING_ORDER);
-    const ringBoxIndex = Math.floor(calc.degree360 / 45) % 8;
+    const anchorBoxIndex = 1;
     for (let p = 0; p < 8; p++) {
-      const expectedCanonicalIndex = (RING_ORDER.indexOf(calc.deity) + (p - ringBoxIndex) + 8) % 8;
+      const expectedCanonicalIndex = (RING_ORDER.indexOf(calc.deity) + (p - anchorBoxIndex) + 8) % 8;
       expect(RING_ORDER[(p + calc.ringStart) % 8]).toBe(RING_ORDER[expectedCanonicalIndex]);
     }
+  });
+
+  it("anchors a different weekday's deity at whichever ring box its own InnerHomeDSq resolves to (Tuesday -> Mars, Libra -> ring box 3)", () => {
+    // 2024-01-09 is a Tuesday. hour12(12)=12, A=6, B=360, C=180, D=180 -> Libra (direct, ring box 3).
+    const calc = computeJamagraha("2024-01-09", "12:00", RING_ORDER);
+    expect(calc.deity).toBe("Mars");
+    expect(calc.rasiIndex).toBe(6); // Libra
+    expect(RING_ORDER[(3 + calc.ringStart) % 8]).toBe("Mars");
+  });
+
+  it("ringDegrees anchors at D for the deity's box and decreases by 45 anticlockwise per box, per the rule's worked values (Saturn 324, Moon 279, Snake 234, ...)", () => {
+    const calc = computeJamagraha("2024-01-06", "19:12", RING_ORDER);
+    expect(calc.ringDegrees[1]).toBeCloseTo(324, 5); // Saturn's box
+    expect(calc.ringDegrees[2]).toBeCloseTo(279, 5); // Moon's box
+    expect(calc.ringDegrees[3]).toBeCloseTo(234, 5); // Snake/Maandi's box
+    expect(calc.ringDegrees[4]).toBeCloseTo(189, 5); // Sun's box
+    expect(calc.ringDegrees[5]).toBeCloseTo(144, 5); // Mars's box
+    expect(calc.ringDegrees[6]).toBeCloseTo(99, 5); // Jupiter's box
+    expect(calc.ringDegrees[7]).toBeCloseTo(54, 5); // Mercury's box
+    expect(calc.ringDegrees[0]).toBeCloseTo(9, 5); // Venus's box
   });
 });

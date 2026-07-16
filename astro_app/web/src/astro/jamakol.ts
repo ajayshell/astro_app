@@ -31,18 +31,22 @@ export type JamakolGraha = PlanetName | "Maandi";
  *     not Surya/Guru, in the top-left box, which a same-weekday-every-time
  *     shift can't produce but a birth-minute-dependent rotation can.
  *
+ * The degree shown per box also comes from computeJamagraha (`ringDegrees`,
+ * "Rule for filling the remaining Jamagraha in the outer chart") -- each
+ * box is 45 degrees less than its anticlockwise-previous neighbor, anchored
+ * at D itself for the weekday-deity's own box. Falls back to a fixed
+ * 0/45/90/.../315 (by physical position) if `ringDegrees` isn't supplied.
+ *
  * NOT YET CONFIRMED -- flag before relying on this:
  *   - Maandi is placed as a label only; its own classical calculation (a
  *     time-of-day-dependent upagraha position) is not implemented.
- *   - The meaning of the "degree" shown per box (this build uses 0/45/90/.../
- *     315, one per jamam) has not been confirmed against source material.
  */
 
 export const RING_ORDER: JamakolGraha[] = ["Sun", "Mars", "Jupiter", "Mercury", "Venus", "Saturn", "Moon", "Maandi"];
 
 export interface JamakolPeriod {
   ringPosition: number; // 0-7, anti-clockwise from top-left
-  degree: number; // 0, 45, 90 ... 315 (unconfirmed meaning, see file header)
+  degree: number; // from computeJamagraha's ringDegrees, see file header
   isDay: boolean;
   graha: JamakolGraha;
   start: Date;
@@ -69,8 +73,15 @@ function splitIntoFour(start: Date, end: Date): [Date, Date][] {
   return quarters;
 }
 
-export function computeJamakol(referenceInstant: Date, latitude: number, longitude: number, ringStart = 0): JamakolResult {
+export function computeJamakol(
+  referenceInstant: Date,
+  latitude: number,
+  longitude: number,
+  ringStart = 0,
+  ringDegrees?: number[],
+): JamakolResult {
   const { sunrise, sunset, nextSunrise, zoneName } = computeSunTimes(referenceInstant, latitude, longitude);
+  const degreeFor = (ringPosition: number) => ringDegrees?.[ringPosition] ?? ringPosition * 45;
 
   const periods: JamakolPeriod[] = [];
   const daySegments = splitIntoFour(sunrise, sunset);
@@ -79,12 +90,12 @@ export function computeJamakol(referenceInstant: Date, latitude: number, longitu
   daySegments.forEach(([start, end], i) => {
     const ringPosition = i; // chronological -- always fixed, doesn't rotate
     const graha = RING_ORDER[(ringPosition + ringStart) % 8];
-    periods.push({ ringPosition, degree: ringPosition * 45, isDay: true, graha, start, end });
+    periods.push({ ringPosition, degree: degreeFor(ringPosition), isDay: true, graha, start, end });
   });
   nightSegments.forEach(([start, end], i) => {
     const ringPosition = 4 + i;
     const graha = RING_ORDER[(ringPosition + ringStart) % 8];
-    periods.push({ ringPosition, degree: ringPosition * 45, isDay: false, graha, start, end });
+    periods.push({ ringPosition, degree: degreeFor(ringPosition), isDay: false, graha, start, end });
   });
 
   periods.sort((a, b) => a.ringPosition - b.ringPosition);

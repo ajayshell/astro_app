@@ -28,8 +28,13 @@ import { PlaceSelector, CUSTOM_OPTION } from "../components/PlaceSelector";
 import { useI18n } from "../i18n/LanguageContext";
 import { useBirthDetails } from "../context/BirthDetailsContext";
 import { useCities } from "../context/CitiesContext";
+import { DEBUG_PRESETS } from "../debug/debugPresets";
 
 const DEFAULT_CITY = "Bengaluru";
+
+// `npm run dev:debug` or `./runserver.sh --debug` -- gates the preset
+// buttons below and the existing Udayam/Jamagraha debug panels.
+const isDebugMode = import.meta.env.VITE_DEBUG === "true";
 
 // Anti-clockwise from the top-left corner, in a 6x6 grid: the 8 ring boxes
 // sit at the 4 corners + 4 edge positions (NOT edge midpoints -- traced from
@@ -55,12 +60,6 @@ const INNER_GRID_POSITIONS = SOUTH_INDIAN_GRID_POSITIONS.map(({ rasi, row, col }
   row: row + 1,
   col: col + 1,
 }));
-
-// A dedicated callout box for the Jamagraha marker (deity + degree), rather
-// than crowding it into the already-dense Raasi cell header alongside
-// Aarudom/planets. Sits in a corner of the 6x6 grid that's genuinely unused
-// by both the ring (RING_POSITIONS above) and the inner 4x4 D1 block.
-const JAMAGRAHA_BOX_POSITION = { row: 3, col: 1 };
 
 function fmtTime(d: Date, zoneName: string): string {
   return DateTime.fromJSDate(d).setZone(zoneName).toFormat("h:mm a");
@@ -118,7 +117,13 @@ export function JamakolPage() {
       setError(null);
       const jamagrahaCalc = computeJamagraha(dateStr, timeStr, RING_ORDER);
       setJamagraha(jamagrahaCalc);
-      const jamakolResult = computeJamakol(referenceInstant, latitude, longitude, jamagrahaCalc.ringStart);
+      const jamakolResult = computeJamakol(
+        referenceInstant,
+        latitude,
+        longitude,
+        jamagrahaCalc.ringStart,
+        jamagrahaCalc.ringDegrees,
+      );
       setResult(jamakolResult);
       const newChart = computeChart({
         name: "Jamakol",
@@ -185,6 +190,35 @@ export function JamakolPage() {
     }
   }
 
+  // Debug-mode preset buttons (src/debug/debugPresets.ts) -- fills in
+  // date/time/place and regenerates immediately, same pattern as
+  // handleUseNow (computed and passed directly into generate() rather than
+  // relying on state, which wouldn't have updated yet on this same tick).
+  function handlePreset(preset: (typeof DEBUG_PRESETS)[number]) {
+    const city = cities?.find((c) => c.id === preset.cityId);
+    if (!city) {
+      setError(`Debug preset "${preset.label}": city id ${preset.cityId} not found in data/cities.ts`);
+      return;
+    }
+    setDate(preset.date);
+    setTime(preset.time);
+    setCityId(preset.cityId);
+    try {
+      const { offsetHours } = resolveTimezone(city.latitude, city.longitude, preset.date, preset.time);
+      generate(
+        localWallClockToUtc(preset.date, preset.time, offsetHours),
+        preset.date,
+        preset.time,
+        city.latitude,
+        city.longitude,
+        offsetHours,
+        city.name,
+      );
+    } catch {
+      setError(t("tzError"));
+    }
+  }
+
   // Generate a chart for whatever date/time/place is currently shared (see
   // BirthDetailsContext) on mount -- this also re-runs whenever the tab is
   // switched back to Jamakol, so a date/time/place chosen on the Horoscope
@@ -231,6 +265,16 @@ export function JamakolPage() {
       <div className="app-body jamakol-page">
         <p className="jamakol-warning">{t("jamakolWarning")}</p>
 
+        {isDebugMode && (
+          <div className="debug-preset-bar">
+            {DEBUG_PRESETS.map((preset) => (
+              <button key={preset.label} type="button" onClick={() => handlePreset(preset)}>
+                {preset.date} {preset.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <section className="charts-row">
           {result && chart && (
             <DndContext onDragEnd={handleDragEnd}>
@@ -255,15 +299,6 @@ export function JamakolPage() {
                     style={{ gridRow: row, gridColumn: col }}
                   />
                 ))}
-                {jamagraha && (
-                  <div
-                    className="jamakol-jamagraha-box"
-                    style={{ gridRow: JAMAGRAHA_BOX_POSITION.row, gridColumn: JAMAGRAHA_BOX_POSITION.col }}
-                  >
-                    <span className="jamakol-jamagraha-graha">{grahaName(jamagraha.deity)}</span>
-                    <span className="jamakol-jamagraha-degree">{formatDegreeFull(jamagraha.degree360)}</span>
-                  </div>
-                )}
                 {result.periods.map((p) => {
                   const pos = RING_POSITIONS[p.ringPosition];
                   const isCurrent = result.periods.indexOf(p) === result.currentIndex;
@@ -274,7 +309,7 @@ export function JamakolPage() {
                       style={{ gridRow: pos.row, gridColumn: pos.col }}
                     >
                       <span className="jamakol-cell-graha">{grahaName(p.graha)}</span>
-                      <span className="jamakol-cell-degree">{p.degree}°</span>
+                      <span className="jamakol-cell-degree">{formatDegreeFull(p.degree)}</span>
                     </div>
                   );
                 })}
@@ -347,7 +382,7 @@ export function JamakolPage() {
             </div>
           )}
 
-          {udayam && import.meta.env.VITE_DEBUG === "true" && (
+          {udayam && isDebugMode && (
             <div className="summary">
               <h3>{t("udayamDebugTitle")}</h3>
               <p>{t("udayamS")}: {udayam.S.toFixed(2)}</p>
@@ -359,13 +394,29 @@ export function JamakolPage() {
             </div>
           )}
 
-          {jamagraha && import.meta.env.VITE_DEBUG === "true" && (
+          {jamagraha && isDebugMode && (
             <div className="summary">
               <h3>{t("jamagrahaDebugTitle")}</h3>
               <p>{t("jamagrahaWeekday")}: {weekdayName(jamagraha.weekdayIndex)}</p>
               <p>{t("jamagrahaDeity")}: {grahaName(jamagraha.deity)}</p>
               <p>{t("jamagrahaDegree")}: {jamagraha.degree360.toFixed(2)}°</p>
               <p>{t("jamagrahaSquare")}: {rasiFullName(jamagraha.rasiIndex)} {jamagraha.degree.toFixed(2)}°</p>
+            </div>
+          )}
+
+          {jamagraha && isDebugMode && (
+            <div className="jamakol-calc-trace">
+              <h3>{t("jamagrahaCalcTraceTitle")}</h3>
+              <pre>{[
+                `A = ${jamagraha.hour12} - 6 = ${jamagraha.a}`,
+                `B = ${jamagraha.a}*60 + ${jamagraha.minute} + ${jamagraha.second}/60 = ${jamagraha.b.toFixed(3)}`,
+                `C = ${jamagraha.b.toFixed(3)}/2 = ${jamagraha.c.toFixed(3)}`,
+                `D = 360 - ${jamagraha.c.toFixed(3)} = ${jamagraha.degree360.toFixed(3)}`,
+                "",
+                `= ${Math.floor(jamagraha.degree360)} degrees, ` +
+                  `.${Math.round((jamagraha.degree360 - Math.floor(jamagraha.degree360)) * 100)}*60 = ` +
+                  `${((jamagraha.degree360 - Math.floor(jamagraha.degree360)) * 60).toFixed(1)}`,
+              ].join("\n")}</pre>
             </div>
           )}
         </div>

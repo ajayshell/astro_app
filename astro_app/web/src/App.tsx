@@ -5,7 +5,11 @@ import { UserGuidePage } from "./pages/UserGuidePage";
 import { useI18n } from "./i18n/LanguageContext";
 import type { Language } from "./i18n/translations";
 import { SUPPORT_EMAIL } from "./config";
-import { MailIcon, BookIcon } from "./components/Icons";
+import { MailIcon, BookIcon, AlertIcon } from "./components/Icons";
+import { useBirthDetails } from "./context/BirthDetailsContext";
+import { useCities } from "./context/CitiesContext";
+import { CUSTOM_OPTION } from "./components/PlaceSelector";
+import { to12HourTime } from "./astro/format";
 import "./App.css";
 
 type Page = "horoscope" | "jamakol" | "userGuide";
@@ -13,6 +17,21 @@ type Page = "horoscope" | "jamakol" | "userGuide";
 function App() {
   const { language, setLanguage, t } = useI18n();
   const [page, setPage] = useState<Page>("horoscope");
+  const { date, time, cityId, customLat, customLon } = useBirthDetails();
+  const { cities } = useCities();
+
+  const placeLabel =
+    cityId === CUSTOM_OPTION ? `${customLat}, ${customLon}` : (cities?.find((c) => c.id === cityId)?.name ?? cityId);
+
+  const reportErrorBody = [
+    `${t("dateOfBirth")}: ${date.split("-").reverse().join("-")}`,
+    `${t("timeOfBirth")}: ${to12HourTime(time)}`,
+    `${t("placeOfBirth")}: ${placeLabel}`,
+    "",
+    t("reportErrorDescribeIssue"),
+    "",
+  ].join("\n");
+  const reportErrorHref = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(t("reportErrorSubject"))}&body=${encodeURIComponent(reportErrorBody)}`;
 
   return (
     <div className="app-shell">
@@ -26,6 +45,10 @@ function App() {
             <BookIcon />
             {t("userGuide")}
           </button>
+          <a className="contact-us-badge badge-secondary" href={reportErrorHref}>
+            <AlertIcon />
+            {t("reportError")}
+          </a>
         </div>
         <label className="language-toggle">
           {t("language")}

@@ -12,12 +12,18 @@ The result should be called Soorya Veedhi Count (SVC)
 
 Next, count from Udayam, clockwise for SVC number of squares and then write 'Kavippu' in that square.
 
+==================
+Reference section:
+        
+        'BLUE SERIES' = "Sun, Mars, Jupiter, Mercury, Venus, Saturn, Moon, Snake"
+==================
 
 Rule for calculating the degrees for Aarudom in the chart:
 Pick up the minutes of the time of birth and multiply it by 6 = degree of the Aarudom. Call this Ad
-From Mesham, subtract 30 degrees from Ad for each square traversed, including Mesham. When writing Aarudom write the reminder next to it.
+From Mesham, subtract 30 degrees from Ad for each square traversed, including Mesham. When writing Aarudom write
+ the reminder next to it.
 
-Rule for calculating degrees for Kaippu.
+Rule for calculating degrees for Kavippu.
 degrees for Kavippu = 30 - degrees of Aarudom.
 Calculate this and print it next to Kavippu (wherever Kavippu is present)
 
@@ -26,16 +32,29 @@ Calculate this and print it next to Kavippu (wherever Kavippu is present)
     - For A -> convert to minutes. e.g: 3.12 should be 3*60 + 12. Call this B
     - C = B/2
     - 360-C. Call it D.
-    - From Aries (inclusive), clockwise, count forward and place the value of D in the outer side of the 
-    square and write the ‘day of the god’ in the square. -> Call this square as sqE.
-    - Fill all the the outer blue boxes with other gods. Start from Saturn, anticlockwise, fill each of the blue
-    box as a series as follows:
-        - Sun, Mars, Jupiter, Mercury, Venus, Saturn, Moon, Snake.
+    Steps to update this in the chart:
+        - Each square inside is 30degrees long. 
+        - Starting from Aries square and counting that square as the first square, traverse along in clockwise direction D degrees in distance. 
+        Call this square InnerHomeDSq.
+        e.g: for D = 65, you will move 30degrees in Aries, 30 in Tau and then move into Gem square as there is a remaining 5 degrees. 
+    Steps to update the outer square in the chart:
+        - Start from InnerHomeDSq square. Step into the space right outside the sqare in the outer area of the inner square.
+        - If this it is inside a blue square, then write the 'day of the god' in that square. 
+            Then for rest of the blue squares, pick the name from the 'blue series' list, which is a circular ring list that can start from any name.
+        - If this is NOT a blue square, then write it where you are, then continue updating rest of
+            blue squares in anti-clockwise order with names from the 'blue series' circular list.
+
+        CLARIFIED (2026-07-15): when the outer step lands on a non-blue square, do NOT write anything
+        there -- skip straight to the next blue square (continuing anti-clockwise) and write 'day of
+        the god' there instead. The 'day of the god' + D marker only ever appears in blue squares.
+
     example: time is 7.12pm. Day = Saturday
         A = 7 - 6 = 1
         B = 1*60+12 = 72
         C = B/2 = 36
         D = 360 - C = 324
-        Now, starting from Aries, inclusive, move 30degrees for each square. So 10 squares and remainder of 8 degrees
-        Write the 'god of day' and 324deg in that square.
+        Now, starting from Aries, inclusive, move 30degrees for each square. 
+        So 10 squares and remainder of 8 degrees. You will reach 'Cap' square, move to the outer area 
+            blue square and write value of D and 'Saturn' (for Saturday)
+        Then you will move anti-clockwise into each blue square and write 'Moon', 'Maandi', etc...
         
